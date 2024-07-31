@@ -15,8 +15,10 @@ from guis_helpers import display_images_in_DS9
 
 # xpa resources:
 # https://www.astro.louisville.edu/software/xmccd/archive/xmccd-4.1/xmccd-4.1e/docs/xpa/xpa.pdf
-# http://ds9.si.edu/doc/ref/xpa.html#lock
+# http://ds9.si.edu/doc/ref/xpa.html#lock    
 
+def get2D_cutout_size(cutout):
+    
 
 def showSpec2D_PASSAGE(parno, obid, path_to_wisp_data=""):
     """Display spec2D cutouts in DS9.
@@ -69,13 +71,31 @@ def showSpec2D_PASSAGE(parno, obid, path_to_wisp_data=""):
     # # config display properties
     os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame 1")
     # os.system("xpaset -p {SPEC2D_TITLE_DS9} lock frame physical")
-
     os.system(f"xpaset -p {SPEC2D_TITLE_DS9} lock colorbar")
     os.system(f"xpaset -p {SPEC2D_TITLE_DS9} lock scale")
     os.system(f"xpaset -p {SPEC2D_TITLE_DS9} lock scalelimits")
     os.system(f"xpaset -p {SPEC2D_TITLE_DS9} cmap grey")
-    # os.system(f"xpaset -p {SPEC2D_TITLE_DS9} lock image")
-    os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
+    
+    for fno in [1,2,3,4,5]:
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
+        # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width. Will need to be changed for NIRCam
+        # The length is set to the length of the cutout -8 (for 4 pix on each end)
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 39.5 32.5 70 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
+
+    for fno in [6,7,8,9,10]:
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
+        # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye. 
+        # Will need to be changed for NIRCam
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 49.5 32.5 90 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
+
+    for fno in [11,12,13,14,15]:
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
+        # 70 and 33 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye.
+        # Will need to be changed for NIRCam
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 70 33 130 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
     return
 
 
