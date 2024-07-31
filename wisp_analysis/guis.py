@@ -17,8 +17,6 @@ from guis_helpers import display_images_in_DS9
 # https://www.astro.louisville.edu/software/xmccd/archive/xmccd-4.1/xmccd-4.1e/docs/xpa/xpa.pdf
 # http://ds9.si.edu/doc/ref/xpa.html#lock    
 
-def get2D_cutout_size(cutout):
-    
 
 def showSpec2D_PASSAGE(parno, obid, path_to_wisp_data=""):
     """Display spec2D cutouts in DS9.
