@@ -119,7 +119,7 @@ def get_fitpar_indices():
 
 ################################################################################
 
-def emissionline_model(pars, x):
+def emissionline_model(pars, x, comps=False):
     # The emission line model includes 'pars' for the continuum and emission line
     # parameters. The input 'x' is the wavelength array, which can include gaps.
     # mpfit.py allows for 'pegged', 'fixed', and 'limited' parameters with 'limits'.
@@ -289,6 +289,48 @@ def emissionline_model(pars, x):
         
         if np.size(w) > 0:
             cont_model[w] = interpolate.splev(x[w], continuum_spline_model_red, der=0)
+
+
+    # Added by KVN (01-Aug-2024) to compute double gaussian model with broad & narrow components
+    # Originally written by Mitchell Revalski for stacked spectra
+    if comps == True:
+
+            model_narrow = ha_6565_amp * gaussian(x, 6564.610 + ha_6565_dzx, ha_6565_sig) + \
+                    hb_4863_amp * gaussian(x, 4862.683 + hb_4863_dzx, o3_5007_sig) + \
+                    hg_4342_amp * gaussian(x, 4341.684 + hg_4342_dzx, hg_4342_sig) + \
+                    hd_4102_amp * gaussian(x, 4102.892 + hd_4102_dzx, hd_4102_sig) + \
+                    o3_5007_amp * gaussian(x, 5008.240 + o3_5007_dzx, o3_5007_sig) + \
+                    o3_5007_amp / 3.0 * gaussian(x, 4960.295 + o3_5007_dzx, o3_5007_sig) + \
+                    o2_3727_amp * gaussian(x, ((o2_3727_vac + o2_3730_vac)/2.0) + o2_3727_dzx, o2_3727_sig) + \
+                    s2_6725_amp * gaussian(x, 6725.480 + ha_6565_dzx, ha_6565_sig) + \
+                    h1_5876_amp * gaussian(x, 5877.243 + h1_5876_dzx, h1_5876_sig) + \
+                    o1_6300_amp * gaussian(x, 6302.046 + o1_6300_dzx, o1_6300_sig) + \
+                    o1_6300_amp / 3.0 * gaussian(x, 6365.536 + o1_6300_dzx, o1_6300_sig) + \
+                    n3_3870_amp * gaussian(x, 3870.160 + n3_3870_dzx, n3_3870_sig) + \
+                    n2_6585_amp * gaussian(x, 6585.280 + ha_6565_dzx, ha_6565_sig) + \
+                    n2_6585_amp / 3.0 * gaussian(x, 6549.850 + ha_6565_dzx, ha_6565_sig)+ \
+                    h1_6680_amp * gaussian(x, 6679.995 + ha_6565_dzx, ha_6565_sig) + \
+                    h2_4686_amp * gaussian(x, 4687.020 + h2_4686_dzx, h2_4686_sig)
+                    #o2_3730_amp * gaussian(x, o2_3730_vac + o2_3727_dzx, o2_3727_sig) + \
+    
+            model_broad = ha_6565_amp_broad * gaussian(x, 6564.610 + ha_6565_dzx, ha_6565_sig_broad) + \
+                    hb_4863_amp_broad * gaussian(x, 4862.683 + hb_4863_dzx, o3_5007_sig_broad) + \
+                    hg_4342_amp_broad * gaussian(x, 4341.684 + hg_4342_dzx, hg_4342_sig_broad) + \
+                    hd_4102_amp_broad * gaussian(x, 4102.892 + hd_4102_dzx, hd_4102_sig_broad) + \
+                    o3_5007_amp_broad * gaussian(x, 5008.240 + o3_5007_dzx, o3_5007_sig_broad) + \
+                    o3_5007_amp_broad / 3.0 * gaussian(x, 4960.295 + o3_5007_dzx, o3_5007_sig_broad) + \
+                    o2_3727_amp_broad * gaussian(x, ((o2_3727_vac + o2_3730_vac)/2.0) + o2_3727_dzx, o2_3727_sig_broad) + \
+                    s2_6725_amp_broad * gaussian(x, 6725.480 + ha_6565_dzx, ha_6565_sig_broad) + \
+                    h1_5876_amp_broad * gaussian(x, 5877.243 + h1_5876_dzx, h1_5876_sig_broad) + \
+                    o1_6300_amp_broad * gaussian(x, 6302.046 + o1_6300_dzx, o1_6300_sig_broad) + \
+                    o1_6300_amp_broad / 3.0 * gaussian(x, 6365.536 + o1_6300_dzx, o1_6300_sig_broad) + \
+                    n3_3870_amp_broad * gaussian(x, 3870.160 + n3_3870_dzx, n3_3870_sig_broad) + \
+                    n2_6585_amp_broad * gaussian(x, 6585.280 + ha_6565_dzx, ha_6565_sig_broad) + \
+                    n2_6585_amp_broad / 3.0 * gaussian(x, 6549.850 + ha_6565_dzx, ha_6565_sig_broad) + \
+                    h1_6680_amp_broad * gaussian(x, 6679.995 + ha_6565_dzx, ha_6565_sig_broad) + \
+                    h2_4686_amp_broad * gaussian(x, 4687.020  + h2_4686_dzx, h2_4686_sig_broad)
+                    #o2_3727_amp_broad * gaussian(x, o2_3730_vac + o2_3727_dzx, o2_3727_sig_broad) + \
+        
             
                 
     
@@ -399,8 +441,8 @@ def emissionline_model(pars, x):
     ############################################################################
 
 
-def model_resid(pars, fjac = None, lam = None, flux = None, err = None):
-    model = emissionline_model(pars, lam)
+def model_resid(pars, fjac = None, lam = None, flux = None, err = None, comps=False):
+    model = emissionline_model(pars, lam, comps)
     resid = (flux - model) / err
     status = 0
     return [status, resid]
@@ -417,6 +459,7 @@ def fit_obj(input_list):
     beam_name   = input_list[6] # object id.
     ab_image_max= input_list[7] # MDR 2022/06/30
     fast_fit    = input_list[8] # MDR 2022/06/30
+    comps_in    = input_list[9] # KVN 01-Aug-2024
     line_mask   = config_pars['line_mask']
     fit_region  = config_pars['fit_region']
     disp_red    = config_pars['dispersion_red']
@@ -595,7 +638,7 @@ def fit_obj(input_list):
                 wline = np.where((lam_spec > (centroid - 5.0 * disp)) & (lam_spec < (centroid + 5.0 * disp)))
                 if (np.size(wline) > 0):
                     peakval = np.max(flux_spec[wline])
-                    amplitude_guess = (peakval - emissionline_model(out.params, np.array([centroid])))[0] # Peak minus continuum.
+                    amplitude_guess = (peakval - emissionline_model(out.params, np.array([centroid]), comps_in))[0] # Peak minus continuum.
                     if (amplitude_guess < 0.0):
                         amplitude_guess = 0.0
                 else: amplitude_guess = 1.0
@@ -843,8 +886,7 @@ def fit_obj(input_list):
         else:
             print('Running full line fit...')
 
-        out = mpfit(model_resid, pguess, functkw = fa, parinfo = parinfo, quiet = True, maxiter = 100)
-
+        out = mpfit(model_resid, pguess, functkw = fa, parinfo = parinfo, quiet = True, ftol = 1e-10, xtol=1e-10, maxiter = 200)
         end_time = default_timer() # time the fit for performance analyses.
 
         fit_time = np.format_float_positional(end_time - start_time, precision = 2)
@@ -914,7 +956,7 @@ def fit_obj(input_list):
         as HA+[N II] that have special constraints and are handled separately.
         '''
 
-        def calculate_emission_line_flux(centroid, amplitude_index, rest_wave):
+        def calculate_emission_line_flux(centroid, amplitude_index, rest_wave, comps):
             with np.errstate(invalid = 'ignore', divide = 'ignore'):
                 if ((centroid > np.min(lam_spec)) & (centroid < np.max(lam_spec))):
                     if (centroid < transition_wave1):
@@ -931,7 +973,7 @@ def fit_obj(input_list):
                     else:
                         w = np.where((lam_spec > (centroid - fwhm_guess)) & (lam_spec < (centroid + fwhm_guess)))
                         line_err = np.sqrt(np.sum(error_spec[w] ** 2.0))
-                    line_cont   = emissionline_model(modelpars_nolines, rest_wave * np.array([1.0 + out.params[z_idx]]))[0] # redshift.
+                    line_cont   = emissionline_model(modelpars_nolines, rest_wave * np.array([1.0 + out.params[z_idx]]), comps)[0] # redshift.
                     line_ew_obs = (line_flux / line_cont)
                 else:
                     line_flux   = (-1 / scl)
@@ -943,18 +985,18 @@ def fit_obj(input_list):
         ############################################################################
 
         # calculate the emission line fluxes and return them to measure_z_interactive().
-        h2_1640_flux, h2_1640_err, h2_1640_ew_obs = calculate_emission_line_flux(h2_1640_obs, h2_1640_idx, h2_1640_vac)
-        hg_4342_flux, hg_4342_err, hg_4342_ew_obs = calculate_emission_line_flux(hg_4342_obs, hg_4342_idx, hg_4342_vac)
-        o3_4363_flux, o3_4363_err, o3_4363_ew_obs = calculate_emission_line_flux(o3_4363_obs, o3_4363_idx, o3_4363_vac)
-        h2_4686_flux, h2_4686_err, h2_4686_ew_obs = calculate_emission_line_flux(h2_4686_obs, h2_4686_idx, h2_4686_vac)
-        hb_4863_flux, hb_4863_err, hb_4863_ew_obs = calculate_emission_line_flux(hb_4863_obs, hb_4863_idx, hb_4863_vac)
-        n2_6550_flux, n2_6550_err, n2_6550_ew_obs = calculate_emission_line_flux(n2_6550_obs, n2_6550_idx, n2_6550_vac) # tied to 1/3 of 6585.
-        ha_6565_flux, ha_6565_err, ha_6565_ew_obs = calculate_emission_line_flux(ha_6565_obs, ha_6565_idx, ha_6565_vac)
-        n2_6585_flux, n2_6585_err, n2_6585_ew_obs = calculate_emission_line_flux(n2_6585_obs, n2_6585_idx, n2_6585_vac)
-        he10830_flux, he10830_err, he10830_ew_obs = calculate_emission_line_flux(he10830_obs, he10830_idx, he10830_vac)
-        pg_10941_flux, pg_10941_err, pg_10941_ew_obs = calculate_emission_line_flux(pg_10941_obs, pg_10941_idx, pg_10941_vac)
-        pb_12822_flux, pb_12822_err, pb_12822_ew_obs = calculate_emission_line_flux(pb_12822_obs, pb_12822_idx, pb_12822_vac)
-        pa_18756_flux, pa_18756_err, pa_18756_ew_obs = calculate_emission_line_flux(pa_18756_obs, pa_18756_idx, pa_18756_vac)
+        h2_1640_flux, h2_1640_err, h2_1640_ew_obs = calculate_emission_line_flux(h2_1640_obs, h2_1640_idx, h2_1640_vac, comps_in)
+        hg_4342_flux, hg_4342_err, hg_4342_ew_obs = calculate_emission_line_flux(hg_4342_obs, hg_4342_idx, hg_4342_vac, comps_in)
+        o3_4363_flux, o3_4363_err, o3_4363_ew_obs = calculate_emission_line_flux(o3_4363_obs, o3_4363_idx, o3_4363_vac, comps_in)
+        h2_4686_flux, h2_4686_err, h2_4686_ew_obs = calculate_emission_line_flux(h2_4686_obs, h2_4686_idx, h2_4686_vac, comps_in)
+        hb_4863_flux, hb_4863_err, hb_4863_ew_obs = calculate_emission_line_flux(hb_4863_obs, hb_4863_idx, hb_4863_vac, comps_in)
+        n2_6550_flux, n2_6550_err, n2_6550_ew_obs = calculate_emission_line_flux(n2_6550_obs, n2_6550_idx, n2_6550_vac, comps_in) # tied to 1/3 of 6585.
+        ha_6565_flux, ha_6565_err, ha_6565_ew_obs = calculate_emission_line_flux(ha_6565_obs, ha_6565_idx, ha_6565_vac, comps_in)
+        n2_6585_flux, n2_6585_err, n2_6585_ew_obs = calculate_emission_line_flux(n2_6585_obs, n2_6585_idx, n2_6585_vac, comps_in)
+        he10830_flux, he10830_err, he10830_ew_obs = calculate_emission_line_flux(he10830_obs, he10830_idx, he10830_vac, comps_in)
+        pg_10941_flux, pg_10941_err, pg_10941_ew_obs = calculate_emission_line_flux(pg_10941_obs, pg_10941_idx, pg_10941_vac, comps_in)
+        pb_12822_flux, pb_12822_err, pb_12822_ew_obs = calculate_emission_line_flux(pb_12822_obs, pb_12822_idx, pb_12822_vac, comps_in)
+        pa_18756_flux, pa_18756_err, pa_18756_ew_obs = calculate_emission_line_flux(pa_18756_obs, pa_18756_idx, pa_18756_vac, comps_in)
         
         '''
         Calculate the flux, error, and equivalent width values for halpha and
@@ -986,7 +1028,7 @@ def fit_obj(input_list):
 
         ############################################################################
 
-        def calculate_doublet_line_flux(centroid_1, amplitude_index_1, rest_wave_1, centroid_2, amplitude_index_2, rest_wave_2):
+        def calculate_doublet_line_flux(centroid_1, amplitude_index_1, rest_wave_1, centroid_2, amplitude_index_2, rest_wave_2, comps):
             with np.errstate(invalid = 'ignore', divide = 'ignore'):
                 if ((centroid_1 > np.min(lam_spec)) & (centroid_2 < np.max(lam_spec))):
                     if (centroid_2 < transition_wave1):
@@ -1013,11 +1055,11 @@ def fit_obj(input_list):
                         line_err_2 = np.sqrt(np.sum(error_spec[w_2] ** 2.0))
                         w = np.where((lam_spec > (centroid_1 - fwhm_guess)) & (lam_spec < (centroid_2 + fwhm_guess)))
                         line_err = np.sqrt(np.sum(error_spec[w] ** 2.0))
-                    line_cont_1   = emissionline_model(modelpars_nolines, rest_wave_1 * np.array([1.0 + out.params[z_idx]]))[0] # redshift.
+                    line_cont_1   = emissionline_model(modelpars_nolines, rest_wave_1 * np.array([1.0 + out.params[z_idx]]), comps)[0] # redshift.
                     line_ew_obs_1 = (line_flux_1 / line_cont_1)
-                    line_cont_2   = emissionline_model(modelpars_nolines, rest_wave_2 * np.array([1.0 + out.params[z_idx]]))[0] # redshift.
+                    line_cont_2   = emissionline_model(modelpars_nolines, rest_wave_2 * np.array([1.0 + out.params[z_idx]]), comps)[0] # redshift.
                     line_ew_obs_2 = (line_flux_2 / line_cont_2)
-                    line_cont     = emissionline_model(modelpars_nolines, ((rest_wave_1 + rest_wave_2) / 2.0) * np.array([1.0 + out.params[z_idx]]))[0] # redshift.
+                    line_cont     = emissionline_model(modelpars_nolines, ((rest_wave_1 + rest_wave_2) / 2.0) * np.array([1.0 + out.params[z_idx]]), comps)[0] # redshift.
                     line_ew_obs   = (line_flux / line_cont)
                 else:
                     line_flux_1   = (-1 / scl)
@@ -1042,40 +1084,40 @@ def fit_obj(input_list):
         out.params[la_wing_amp_idx] = (out.params[la_wing_amp_idx] / 2.0)
 
         la_1216_wing_flux, la_1216_wing_err, la_1216_wing_ew_obs, la_1216_flux, la_1216_err, la_1216_ew_obs, la_wing_flux, la_wing_err, la_wing_ew_obs = \
-        calculate_doublet_line_flux(la_1216_obs, la_1216_idx, la_1216_vac, la_1216_obs, la_wing_amp_idx, la_1216_vac)
+        calculate_doublet_line_flux(la_1216_obs, la_1216_idx, la_1216_vac, la_1216_obs, la_wing_amp_idx, la_1216_vac, comps_in)
 
         n5_1238_1242_flux, n5_1238_1242_err, n5_1238_1242_ew_obs, n5_1238_flux, n5_1238_err, n5_1238_ew_obs, n5_1242_flux, n5_1242_err, n5_1242_ew_obs = \
-        calculate_doublet_line_flux(n5_1238_obs, n5_1238_idx, n5_1238_vac, n5_1242_obs, n5_1242_idx, n5_1242_vac)
+        calculate_doublet_line_flux(n5_1238_obs, n5_1238_idx, n5_1238_vac, n5_1242_obs, n5_1242_idx, n5_1242_vac, comps_in)
 
         c4_1548_1550_flux, c4_1548_1550_err, c4_1548_1550_ew_obs, c4_1548_flux, c4_1548_err, c4_1548_ew_obs, c4_1550_flux, c4_1550_err, c4_1550_ew_obs = \
-        calculate_doublet_line_flux(c4_1548_obs, c4_1548_idx, c4_1548_vac, c4_1550_obs, c4_1550_idx, c4_1550_vac)
+        calculate_doublet_line_flux(c4_1548_obs, c4_1548_idx, c4_1548_vac, c4_1550_obs, c4_1550_idx, c4_1550_vac, comps_in)
 
         o3_1660_1666_flux, o3_1660_1666_err, o3_1660_1666_ew_obs, o3_1660_flux, o3_1660_err, o3_1660_ew_obs, o3_1666_flux, o3_1666_err, o3_1666_ew_obs = \
-        calculate_doublet_line_flux(o3_1660_obs, o3_1660_idx, o3_1660_vac, o3_1666_obs, o3_1666_idx, o3_1666_vac)
+        calculate_doublet_line_flux(o3_1660_obs, o3_1660_idx, o3_1660_vac, o3_1666_obs, o3_1666_idx, o3_1666_vac, comps_in)
 
         s3_1883_1892_flux, s3_1883_1892_err, s3_1883_1892_ew_obs, s3_1883_flux, s3_1883_err, s3_1883_ew_obs, s3_1892_flux, s3_1892_err, s3_1892_ew_obs = \
-        calculate_doublet_line_flux(s3_1883_obs, s3_1883_idx, s3_1883_vac, s3_1892_obs, s3_1892_idx, s3_1892_vac)
+        calculate_doublet_line_flux(s3_1883_obs, s3_1883_idx, s3_1883_vac, s3_1892_obs, s3_1892_idx, s3_1892_vac, comps_in)
 
         c3_1907_1909_flux, c3_1907_1909_err, c3_1907_1909_ew_obs, c3_1907_flux, c3_1907_err, c3_1907_ew_obs, c3_1909_flux, c3_1909_err, c3_1909_ew_obs = \
-        calculate_doublet_line_flux(c3_1907_obs, c3_1907_idx, c3_1907_vac, c3_1909_obs, c3_1909_idx, c3_1909_vac)
+        calculate_doublet_line_flux(c3_1907_obs, c3_1907_idx, c3_1907_vac, c3_1909_obs, c3_1909_idx, c3_1909_vac, comps_in)
 
         m2_2796_2803_flux, m2_2796_2803_err, m2_2796_2803_ew_obs, m2_2796_flux, m2_2796_err, m2_2796_ew_obs, m2_2803_flux, m2_2803_err, m2_2803_ew_obs = \
-        calculate_doublet_line_flux(m2_2796_obs, m2_2796_idx, m2_2796_vac, m2_2803_obs, m2_2803_idx, m2_2803_vac)
+        calculate_doublet_line_flux(m2_2796_obs, m2_2796_idx, m2_2796_vac, m2_2803_obs, m2_2803_idx, m2_2803_vac, comps_in)
 
         o2_3727_3730_flux, o2_3727_3730_err, o2_3727_3730_ew_obs, o2_3727_flux, o2_3727_err, o2_3727_ew_obs, o2_3730_flux, o2_3730_err, o2_3730_ew_obs = \
-        calculate_doublet_line_flux(o2_3727_obs, o2_3727_idx, o2_3727_vac, o2_3730_obs, o2_3730_idx, o2_3730_vac)
+        calculate_doublet_line_flux(o2_3727_obs, o2_3727_idx, o2_3727_vac, o2_3730_obs, o2_3730_idx, o2_3730_vac, comps_in)
 
         o3_4959_5007_flux, o3_4959_5007_err, o3_4959_5007_ew_obs, o3_4959_flux, o3_4959_err, o3_4959_ew_obs, o3_5007_flux, o3_5007_err, o3_5007_ew_obs = \
-        calculate_doublet_line_flux(o3_4959_obs, o3_4959_idx, o3_4959_vac, o3_5007_obs, o3_5007_idx, o3_5007_vac)
+        calculate_doublet_line_flux(o3_4959_obs, o3_4959_idx, o3_4959_vac, o3_5007_obs, o3_5007_idx, o3_5007_vac, comps_in)
 
         o1_6300_6363_flux, o1_6300_6363_err, o1_6300_6363_ew_obs, o1_6300_flux, o1_6300_err, o1_6300_ew_obs, o1_6363_flux, o1_6363_err, o1_6363_ew_obs = \
-        calculate_doublet_line_flux(o1_6300_obs, o1_6300_idx, o1_6300_vac, o1_6363_obs, o1_6363_idx, o1_6363_vac)
+        calculate_doublet_line_flux(o1_6300_obs, o1_6300_idx, o1_6300_vac, o1_6363_obs, o1_6363_idx, o1_6363_vac, comps_in)
 
         s2_6716_6731_flux, s2_6716_6731_err, s2_6716_6731_ew_obs, s2_6716_flux, s2_6716_err, s2_6716_ew_obs, s2_6731_flux, s2_6731_err, s2_6731_ew_obs = \
-        calculate_doublet_line_flux(s2_6716_obs, s2_6716_idx, s2_6716_vac, s2_6731_obs, s2_6731_idx, s2_6731_vac)
+        calculate_doublet_line_flux(s2_6716_obs, s2_6716_idx, s2_6716_vac, s2_6731_obs, s2_6731_idx, s2_6731_vac, comps_in)
 
         s3_9069_9532_flux, s3_9069_9532_err, s3_9069_9532_ew_obs, s3_9069_flux, s3_9069_err, s3_9069_ew_obs, s3_9532_flux, s3_9532_err, s3_9532_ew_obs = \
-        calculate_doublet_line_flux(s3_9069_obs, s3_9069_idx, s3_9069_vac, s3_9532_obs, s3_9532_idx, s3_9532_vac)
+        calculate_doublet_line_flux(s3_9069_obs, s3_9069_idx, s3_9069_vac, s3_9532_obs, s3_9532_idx, s3_9532_vac, comps_in)
 
         ############################################################################
         ############################################################################

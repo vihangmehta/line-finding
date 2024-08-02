@@ -530,8 +530,6 @@ def show2dNEW(
                 + ".2D.fits"
             )
 
-    print("I am looking for the 2D grisms here: ", path2d, " Is this correct?")
-
     pix_per_um = 1 / (1e-4 * 46.934)  # GR150R 47.015 for GR150C
 
     tweak = 7
@@ -795,28 +793,28 @@ def show2dNEW(
     #    numzer=numzer+1
     #    coordout.close()
 
-    if trans == "log":
-        zscale = "log"
-    else:
-        zscale = "linear"
-    cmd = "xpaset -p ds9 frame " + frameno
-    os.system(cmd)
-    cmd = "xpaset -p ds9 file " + path2d + "[" + str(cutout_index) + "]"
-    os.system(cmd)
-    cmd = "xpaset -p ds9 scale limits " + str(zran1) + " " + str(zran2)
-    os.system(cmd)
-    cmd = "xpaset -p ds9 scale " + zscale
-    os.system(cmd)
+    # if trans == "log":
+    #     zscale = "log"
+    # else:
+    #     zscale = "linear"
+    # cmd = "xpaset -p ds9 frame " + frameno
+    # os.system(cmd)
+    # cmd = "xpaset -p ds9 file " + path2d + "[" + str(cutout_index) + "]"
+    # os.system(cmd)
+    # cmd = "xpaset -p ds9 scale limits " + str(zran1) + " " + str(zran2)
+    # os.system(cmd)
+    # cmd = "xpaset -p ds9 scale " + zscale
+    # os.system(cmd)
 
     # cmd='xpaset -p ds9 zoom to fit'
     # os.system(cmd)
     # HAVE COMMENTED OUT overplotting of some REGIONS files
 
     #  if test[0] != []:
-    cmd = (
-        "xpaset -p ds9 regions file " + outcoo
-    )  # par_root_dir+ 'Spectra/temp_zero_coords_%s.reg'%user
-    os.system(cmd)
+    # cmd = (
+    #     "xpaset -p ds9 regions file " + outcoo
+    # )  # par_root_dir+ 'Spectra/temp_zero_coords_%s.reg'%user
+    # os.system(cmd)
 
     # MR
 
@@ -886,6 +884,7 @@ def showDirectNEW(obid, parno, g102zeroarr, load_image=False, path_to_wisp_data=
 
     # Added getting PA angle of each image.
 
+    '''
     # load the direct images
     if load_image:
         print("IMAGE IS BEING RELOADED AND ROTATION APPLIED!")
@@ -935,6 +934,7 @@ def showDirectNEW(obid, parno, g102zeroarr, load_image=False, path_to_wisp_data=
             cmd = "xpaset -p ds9 pan to " + hexcoo[0] + " " + hexcoo[1]  # +' fk5'
             print(cmd)
             os.system(cmd)
+    '''
     # pan to the coordinates of this object
     if os.path.exists(path110):
         panDirect(hexcoo[0], hexcoo[1], grism="F115W")
@@ -1006,6 +1006,7 @@ def showDispersed(obid, parno, load_image=False, path_to_wisp_data=" "):  # MB
                 y141 = float(linesplit[2].split(",")[0])
         reg141.close()
 
+    '''
     if load_image:
         if os.path.exists(path102) == 1:
             cmd = "xpaset -p ds9 frame 5"
@@ -1029,7 +1030,7 @@ def showDispersed(obid, parno, load_image=False, path_to_wisp_data=" "):  # MB
             os.system(cmd)
             cmd = "xpaset -p ds9 pan to %f %f image" % (x141, y141)
             os.system(cmd)
-
+    '''
     # pan to the coordinates of this object
     if os.path.exists(path102):
         panDispersed(x102, y102, grism="G102")
