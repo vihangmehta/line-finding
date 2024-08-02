@@ -1195,11 +1195,17 @@ class mpfit:
 						if len(whl) > 0:
 							t = ((llim[whl] - x[whl]) /
 								  wa1[whl])
+							try: t = t[0]
+							except: pass
+							#print('1st t= ', t, '1st alpha= ', alpha)
 							alpha = numpy.min([alpha, numpy.min(t)])
 						whu = (numpy.nonzero(((dwa1!=0.) & qulim) & ((x + wa1) > ulim)))[0]
 						if len(whu) > 0:
 							t = ((ulim[whu] - x[whu]) /
 								  wa1[whu])
+							try: t = t[0]
+							except: pass
+							#print('2nd t= ', t, '2nd alpha= ', alpha)
 							alpha = numpy.min([alpha, numpy.min(t)])
 
 					# Obey any max step values.
