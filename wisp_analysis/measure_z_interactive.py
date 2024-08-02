@@ -370,6 +370,7 @@ def print_help_message():
         "\tt = change transition wavelength\n"
         "\tm1, m2, or m3 = mask up to three discontinuous wavelength regions\n"
         "\tnodes = change the wavelengths for the continuum spline nodes\n"
+        "\taddnodes = add wavelengths for the continuum spline nodes\n"
         "\tbluecut = change the blue cutoff of the G102 spec\n"
         "\tredcut  = change the red cutoff of the G141 spec\n\n"
     )
@@ -513,7 +514,8 @@ def plot_chooseSpec(spdata1, spdata2, spdata3, config_pars, plottitle, outdir, z
     if verbose == True:
         print("\nRunning plot_chooseSpec...\n")  # adapted from plot_object by KVN 2024/07/22
     """
-    # save the figure for everything, junk objects and all
+    # Written by KVN to allow the user to see spectra in all orientations
+    # save the figure for everything
     # previous figures are overwritten
     """
     # define the filename that will be used for figures.
@@ -535,9 +537,6 @@ def plot_chooseSpec(spdata1, spdata2, spdata3, config_pars, plottitle, outdir, z
         spec_con3 = spdata3[3]; spec_zer3 = spdata3[4];
     else: spec_lam3=[]; spec_val3 =[]; spec_unc3=[]; spec_con3=[]; spec_zer3=[]
 
-    print(spdata2)
-    print(spdata3)
-    print(np.shape(spec_lam2),np.shape(spec_val2), np.shape(spec_con2) )
     # apply the mask to the wavelength array
     masked_spec_lam = np.ma.masked_where(np.ma.getmask(spec_val1), spec_lam1)
 
@@ -560,7 +559,7 @@ def plot_chooseSpec(spdata1, spdata2, spdata3, config_pars, plottitle, outdir, z
     lw_data = 2.0
     lw_fits = 1.75
 
-    ax1.plot(spec_lam1, spec_val1, "k", spec_lam1, spec_con1, "hotpink", drawstyle="steps-mid", lw=lw_data)
+    ax1.plot(spec_lam1, spec_val1, "k", spec_lam1, spec_con1, "hotpink", spec_lam1, spec_val1+spec_con1, "cornflowerblue", drawstyle="steps-mid", lw=lw_data)
     ax2.plot(spec_lam2, spec_val2, "k", spec_lam2, spec_con2, "hotpink", spec_lam2, spec_val2+spec_con2, "cornflowerblue", drawstyle="steps-mid", lw=lw_data)
     ax3.plot(spec_lam3, spec_val3, "k", spec_lam3, spec_con3, "hotpink", spec_lam3, spec_val3+spec_con3, "cornflowerblue", drawstyle="steps-mid", lw=lw_data)
     # ax1.axvline(x=config_pars['transition_wave'], c='c', linestyle=':', lw=3)
@@ -596,17 +595,11 @@ def plot_chooseSpec(spdata1, spdata2, spdata3, config_pars, plottitle, outdir, z
     ax1.set_title(plottitle+" Combined", size="xx-large")
     ax2.set_title(plottitle+" R", size="xx-large")
     ax3.set_title(plottitle+" C", size="xx-large")
-    
 
-    # fig.text(0.3, 0.96, addtext, ha="right", va="bottom", color=addtextcolor,
-    #     fontsize=18, fontweight=500, path_effects=[PathEffects.withStroke(linewidth=0.5,foreground="k")])
-
-    plt.tight_layout()  # MDR 2022/05/19 - Added to fill screen when fitting.
+    plt.tight_layout() 
     fig.savefig(plotfilename)
     plt.draw()
-    # print_prompt("Choose one of these to fitOptions include: Comb, R, C, CombContam, RContam, and CContam:")
-    # input(">")
-
+    
 
 def plot_object(zguess, zfit, spdata, config_pars, snr_meas_array, snr_tot_others, full_fitmodel, full_contmodel, current_lam, lamlines_found, index_of_strongest_line, contmodel, plottitle, outdir, zset=None, orientation=""):
     if verbose == True:
@@ -861,9 +854,9 @@ def plot_object(zguess, zfit, spdata, config_pars, snr_meas_array, snr_tot_other
             xmax = lam_i + half_xrange_ang
 
             # update to a sigma rejected min?
-            print(spec_val)
-            print(np.shape(spec_val))
-            print(snr_muse_idy - half_xrange_pix, snr_muse_idy + half_xrange_pix)
+            # print(spec_val)
+            # print(np.shape(spec_val))
+            # print(snr_muse_idy - half_xrange_pix, snr_muse_idy + half_xrange_pix)
             ymin = 0.9 * np.nanmin(spec_val[snr_muse_idy - half_xrange_pix : snr_muse_idy + half_xrange_pix])
             ymax = 1.2 * np.nanmax(spec_val[snr_muse_idy - half_xrange_pix : snr_muse_idy + half_xrange_pix])
 
@@ -980,7 +973,8 @@ def inspect_object(
     path_to_wisp_data=" ",
     path_to_output=" ",
     path_to_code=" ",
-    orientation='combined'):
+    orientation='combined',
+    comp_fit = False):
     
     if verbose == True: print("Running inspect_object...\n")  # MDR 2022/05/17
     """
@@ -1005,7 +999,6 @@ def inspect_object(
         specnameg1 = (base_path + ".G115_1D.dat")
         specnameg2 = (base_path + ".G150_1D.dat")
         specnameg3 = (base_path + ".G200_1D.dat")
-        
         specnameg1_R = (base_path + ".F115W_1D_R.dat")
         specnameg2_R = (base_path + ".F150W_1D_R.dat")
         specnameg3_R = (base_path + ".F200W_1D_R.dat")
@@ -1020,37 +1013,55 @@ def inspect_object(
     if os.path.exists(specnameg1):
         availgrism += "g115"
         tab_blue = asciitable.read(specnameg1, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_blue = None
+        tab_blue_cont = np.copy(tab_blue)
+        tab_blue_cont['flux'] = tab_blue['flux'] + tab_blue['contam']
+    else: tab_blue = None; tab_blue_cont = None 
     if os.path.exists(specnameg2):
         availgrism += "g150"
         tab_mid = asciitable.read(specnameg2, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_mid = None
+        tab_mid_cont = np.copy(tab_mid)
+        tab_mid_cont['flux'] = tab_mid['flux'] + tab_mid['contam']
+    else: tab_mid = None; tab_mid_cont = None
     if os.path.exists(specnameg3):
         availgrism += "g200"
         tab_red = asciitable.read(specnameg3, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_red = None
+        tab_red_cont = np.copy(tab_red)
+        tab_red_cont['flux'] = tab_red['flux'] + tab_red['contam']
+    else: tab_red = None; tab_red_cont = None
 
     if availgrism == "g115g150g200": availgrism = "both"  
 
     if os.path.exists(specnameg1_R):
         tab_blue_R = asciitable.read(specnameg1_R, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_blue_R = None
+        tab_blue_R_cont = np.copy(tab_blue_R)
+        tab_blue_R_cont['flux'] = tab_blue_R['flux'] + tab_blue_R['contam']
+    else: tab_blue_R = None; tab_blue_R_cont = None
     if os.path.exists(specnameg2_R):
         tab_mid_R = asciitable.read(specnameg2_R, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_mid_R = None
+        tab_mid_R_cont = np.copy(tab_mid_R)
+        tab_mid_R_cont['flux'] = tab_mid_R['flux'] + tab_mid_R['contam']
+    else: tab_mid_R = None; tab_mid_R_cont= None
     if os.path.exists(specnameg3_R):
         tab_red_R = asciitable.read(specnameg3_R, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_red_R = None
+        tab_red_R_cont = np.copy(tab_red_R)
+        tab_red_R_cont['flux'] = tab_red_R['flux'] + tab_red_R['contam']
+    else: tab_red_R = None; tab_red_R_cont = None
 
     if os.path.exists(specnameg1_C):
         tab_blue_C = asciitable.read(specnameg1_C, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_blue_C = None
+        tab_blue_C_cont = np.copy(tab_blue_C)
+        tab_blue_C_cont['flux'] = tab_blue_C['flux'] + tab_blue_C['contam']
+    else: tab_blue_C = None; tab_blue_C_cont = None
     if os.path.exists(specnameg2_C):
         tab_mid_C = asciitable.read(specnameg2_C, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_mid_C = None
+        tab_mid_C_cont = np.copy(tab_mid_C)
+        tab_mid_C_cont['flux'] = tab_mid_C['flux'] + tab_mid_C['contam']
+    else: tab_mid_C = None; tab_mid_C_cont = None
     if os.path.exists(specnameg3_C):
         tab_red_C = asciitable.read(specnameg3_C, names=["lambda","flux","ferror","contam","zero"])
-    else: tab_red_C = None
+        tab_red_C_cont = np.copy(tab_red_C)
+        tab_red_C_cont['flux'] = tab_red_C['flux'] + tab_red_C['contam']
+    else: tab_red_C = None; tab_red_C_cont = None 
 
     # =================== Show spec2d new (begin) =====================
 
@@ -1225,7 +1236,8 @@ def inspect_object(
     done = 0 if rejectPrevFit else 1
     fast_fit = False  # MDR 2022/06/30 - move to configuration file?
 
-    spdata = trim_spec(
+    # KVN: creating spectra for each orientation ("T" for total/combined, "R" for row, "C" for column)
+    spdata_T = trim_spec(
             tab_blue, tab_mid, tab_red, config_pars, mask_zeros=True, return_masks=True)
 
     spdata_R = trim_spec(
@@ -1234,12 +1246,27 @@ def inspect_object(
     spdata_C = trim_spec(
             tab_blue_C, tab_mid_C, tab_red_C, config_pars, mask_zeros=True, return_masks=True)
 
-    spec_lam = spdata[0]; spec_lam_R = spdata_R[0]; spec_lam_C = spdata_C[0] 
-    spec_val = spdata[1]; spec_val_R = spdata_R[1]; spec_val_C = spdata_C[1] 
-    spec_unc = spdata[2]; spec_unc_R = spdata_R[2]; spec_unc_C = spdata_C[2] 
-    spec_con = spdata[3]; spec_con_R = spdata_R[3]; spec_con_C = spdata_C[3] 
-    spec_zer = spdata[4]; spec_zer_R = spdata_R[4]; spec_zer_C = spdata_C[4] 
-    mask_flg = spdata[5]; spec_flg_R = spdata_R[5]; spec_flg_C = spdata_C[5] 
+    spdata_T_contam = trim_spec(
+            tab_blue_cont, tab_mid_cont, tab_red_cont, config_pars, mask_zeros=True, return_masks=True)
+
+    spdata_R_contam = trim_spec(
+            tab_blue_R_cont, tab_mid_R_cont, tab_red_R_cont, config_pars, mask_zeros=True, return_masks=True)
+
+    spdata_C_contam = trim_spec(
+            tab_blue_C_cont, tab_mid_C_cont, tab_red_C_cont, config_pars, mask_zeros=True, return_masks=True)
+
+    # KVN: This is me being dumb.... better way to do this below
+    # spec_lamT = spdataT[0]; spec_lam_R = spdata_R[0]; spec_lam_C = spdata_C[0]
+    # spec_valT = spdataT[1]; spec_val_R = spdata_R[1]; spec_val_C = spdata_C[1] 
+    # spec_uncT = spdataT[2]; spec_unc_R = spdata_R[2]; spec_unc_C = spdata_C[2] 
+    # spec_conT = spdataT[3]; spec_con_R = spdata_R[3]; spec_con_C = spdata_C[3] 
+    # spec_zerT = spdataT[4]; spec_zer_R = spdata_R[4]; spec_zer_C = spdata_C[4] 
+    # mask_flgT = spdataT[5]; spec_flg_R = spdata_R[5]; spec_flg_C = spdata_C[5] 
+
+    # KVN: default to the combined spectra as this will likely be the preferred option
+    # for most cases. This will be changed if the user makes a different selection
+    spdata = spdata_T
+    spec_lam = spdata[0]; spec_val = spdata[1]; spec_unc = spdata[2]; spec_con = spdata[3]; spec_zer = spdata[4]; mask_flg = spdata[5]
 
     while done == 0:
         # sticking with the while loop to determine whether user is finished with object
@@ -1248,14 +1275,8 @@ def inspect_object(
 
         # KVN: trim_spec has been updated to take 3 grism filters
         # and the code now does this for the row & column (R & C)
-        plot_chooseSpec(spdata, spdata_R, spdata_C, config_pars, plottitle, outdir)
+        plot_chooseSpec(spdata_T, spdata_R, spdata_C, config_pars, plottitle, outdir)
         print_prompt("If you would like to change which spectrum is being fit, type: grismR, grismC, grismRcontam, grismCcontam, CombContam, or Comb to go back to the combined. ")
-    
-        # # fit selected spectrum:
-        # if option.strip().lower() == "comb": pass
-        # elif option.strip().lower() == "r": spdata = spdata_R
-        # elif option.strip().lower() == "c": spdata = spdata_C
-
 
         # Determine the largest extent of the object so broadening of the lines can be accounted for in the fitting. MDR 2022/06/30
         ab_image_max = np.max([objinfo["a_image"][0], objinfo["b_image"][0]])
@@ -1272,7 +1293,8 @@ def inspect_object(
             fwhm_guess,
             str(obj),
             ab_image_max,
-            fast_fit]
+            fast_fit,
+            comp_fit] 
         # parsing the input to facilitate parallel processing when fitting is done in batch mode.
         fitresults = fit_obj(fit_inputs)
         zfit = fitresults["redshift"]
@@ -1367,7 +1389,8 @@ def inspect_object(
             index_of_strongest_line,
             contmodel,
             plottitle,
-            outdir)
+            outdir, 
+            orientation='Combined')
         
         #        print "    Guess Redshift: z = %f" % (zguess)
         print_prompt("    Fit Redshift:   z = %f\n" % (zfit))
@@ -1664,11 +1687,42 @@ def inspect_object(
 
 
         # added by KVN July 2024
-        # ADD nodes used for the continuum spline
+        # Choose which spectrum should be used for the line fitting.
         elif option.strip().lower() == "grismr":
-            spdata = spdata_R
+            spdata_lam_org = spdata[0]
+            if len(spdata_lam_org) == len(spdata_R[0]):
+                spdata = spdata_R
+                orientation = "R"
+            else: print("The selected R orientation appears to have missing data, keeping the original selection.")
+                
+        elif option.strip().lower() == "grismrcontam":
+            spdata_lam_org = spdata[0]
+            if len(spdata_lam_org) == len(spdata_R_contam[0]):
+                spdata = spdata_R_contam
+                orientation = "RContam"
+            else: print("The selected R(with contamination) orientation appears to have missing data, keeping the original selection.")
+                
         elif option.strip().lower() == "grismc":
-            spdata = spdata_C
+            spdata_lam_org = spdata[0]
+            if len(spdata_lam_org) == len(spdata_C[0]):
+                spdata = spdata_C
+                orientation = "C"
+            else: print("The selected C orientation appears to have missing data, keeping the original selection.")
+                
+        elif option.strip().lower() == "grismccontam":
+            spdata_lam_org = spdata[0]
+            if len(spdata_lam_org) == len(spdata_C_contam[0]):
+                spdata = spdata_C_contam
+                orientation = "CContam"
+            else: print("The selected C(with contamination) orientation appears to have missing data, keeping the original selection.")
+
+        elif option.strip().lower() == "comb":
+            spdata = spdata_T
+            orientation = "Combined"
+
+        elif option.strip().lower() == "combcontam":
+            spdata = spdata_T_contam
+            orientation = "CombinedContam"
         
         elif option.strip().lower() == "user":
 
@@ -2113,7 +2167,8 @@ def measure_z_interactive(
     show_dispersed=True,
     path_to_stored_fits=" ",
     print_colors=True,
-):
+    parno=0):
+
     if verbose == True:
         print("\nRunning measure_z_interactive...\n")  # MDR 2022/05/17
     # turn off color printing to terminal if required
@@ -2138,18 +2193,18 @@ def measure_z_interactive(
     #### STEP 0:   set ds9 window to tile mode ################################
     ###########################################################################
     # not the best way to do this, but matching the method in guis.py
-    cmd = "xpaset -p ds9 tile"
-    os.system(cmd)
-    if show_dispersed:
-        cmd = "xpaset -p ds9 tile grid layout 3 2"
-    else:
-        cmd = "xpaset -p ds9 tile grid layout 2 2"
-    os.system(cmd)
+    # cmd = "xpaset -p ds9 tile"
+    # os.system(cmd)
+    # if show_dispersed:
+    #     cmd = "xpaset -p ds9 tile grid layout 3 2"
+    # else:
+    #     cmd = "xpaset -p ds9 tile grid layout 2 2"
+    # os.system(cmd)
 
     #### STEP 1:   get linelist ###############################################
     ###########################################################################
     if linelistfile == " ":
-        files = glob("linelist/Par*lines.dat")
+        files = glob("linelist/Par"+str(parno)+"lines.dat")
         if len(files) == 0:
             print_prompt("No line list file found", prompt_type="interim")
             return 0
@@ -2177,21 +2232,20 @@ def measure_z_interactive(
     npix = llin["npix"]
     ston = llin["ston"]
     objid_unique = np.unique(objid)
-    par = parnos[0]  # MDR 2022/05/17
+    #par = parnos[0]  # MDR 2022/05/17
+    par = parno # KVN 2024/07/31
 
     #### STEP 2:  set user name and output directory #########################
     ###########################################################################
     if verbose == True:
         print("")
-        print("Searching for data files in...\n")  # MDR 2022/05/17
+        print("All outputs will be stored in...\n")  # MDR 2022/05/17
         print(os.getcwd())
         print("")
 
-    tmp = glob(path_to_wisp_data + "Par" + str(par) + "/Spectra/*.dat")[
-        0
-    ]  # MDR 2022/05/17
+    tmp = glob(path_to_wisp_data + "Par" + str(par) + "/Spectra/*.dat")  # MDR 2022/05/17 and updated KVN 2024/07/31
     print_prompt(
-        "You are about to inspect emission lines identified in parallel field {}".format(par),
+        "You are about to inspect emission lines identified in parallel field {}".format(parno),
         prompt_type="interim",
     )
     print_prompt("Please enter your name or desired username", prompt_type="interim")
@@ -2204,7 +2258,7 @@ def measure_z_interactive(
             break
     user = user.strip().lower()
     # create output directory
-    outdir = "Par%s_output_%s" % (par, user)
+    outdir = "Par%s_output_%s" % (parno, user)
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
 
@@ -2270,7 +2324,7 @@ def measure_z_interactive(
         print("Creating trace.reg files...\n")  # MDR 2022/05/17
 
     trace102 = open(
-        path_to_wisp_data + "/Par" + str(par) + "/Spectra/G102_trace.reg", "w"
+        path_to_wisp_data + "/Par" + str(parno) + "/Spectra/G102_trace.reg", "w"
     )
     trace102.write(
         'global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\n'
@@ -2313,7 +2367,7 @@ def measure_z_interactive(
     cat = Table.read(secats[0])
 
     if verbose == True:
-        print("I found the following catalogs...\n")  # MDR 2022/05/17
+        print("I found the following photometric catalogs...\n")  # MDR 2022/05/17
         print(secats)  # MDR 2022/05/17
         # print('\nThe catalog was read in as...\n') # MDR 2022/05/17
         # print(cat)
