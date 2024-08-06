@@ -61,19 +61,19 @@ def read_config(config, availgrism='both'):
 
 
 # Creates .reg files for direct and dispersed images
-# Written by Mason Huberty and adapted by KVN
+# Written by Mason Huberty 
 def create_regions(parno, path_to_wisp_data):
     
     #Direct image
-    hdul = fits.open('Par28_speccat.fits')
+    hdul = fits.open(path_to_wisp_data + 'Par' + str(parno) + '_speccat.fits')
     cat=hdul[1].data
-    f = open("Par28v2direct.reg",'a')
+    f = open('Par' + str(parno) + 'direct.reg','a')
     for i in range(len(cat['ra'])):
         f.write("WCS;circle("+str(cat['ra'][i])+','+str(cat['dec'][i])+',0.5") # color=green text={'+str(cat['id'][i])+' z='+str(round(cat['redshift'][i],3))+'} font="times 10 bold italic" textangle=30\n')
     f.close()
 
     #This and subsequent are for the first order beams. Offsets taken from the config files
-    f = open("Par28F115r_grism.reg",'a')
+    f = open("Par" + str(parno) + "F115r_grism.reg",'a')
     w = WCS('Par28_228_f115w-gr150r_drz_sci.fits')
     for i in range(len(cat['ra'])):
         ra, dec = (cat['ra'][i], cat['dec'][i])
