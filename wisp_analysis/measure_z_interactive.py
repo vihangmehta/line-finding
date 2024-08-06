@@ -367,12 +367,12 @@ def print_help_message():
     msg += setcolors["heading"] + "\tSPECTRUM SPECIFIC OPTIONS:\n"
     msg += (
         setcolors["helpmsg"] + "\tfw = change the fwhm guess in pixels\n"
-        "\tt = change transition wavelength\n"
+        "\tt1, t2 = change transition wavelength between F115W and F150W (t1) and F150W and F200W (t2)\n"
         "\tm1, m2, or m3 = mask up to three discontinuous wavelength regions\n"
         "\tnodes = change the wavelengths for the continuum spline nodes\n"
         "\taddnodes = add wavelengths for the continuum spline nodes\n"
-        "\tbluecut = change the blue cutoff of the G102 spec\n"
-        "\tredcut  = change the red cutoff of the G141 spec\n\n"
+        "\tbluecut = change the blue cutoff of the F115W grism\n"
+        "\tredcut  = change the red cutoff of the F200W grism\n\n"
     )
     msg += setcolors["heading"] + "\tDS9 SPECIFIC OPTIONS:\n"
     msg += (
@@ -566,7 +566,7 @@ def plot_chooseSpec(spdata1, spdata2, spdata3, config_pars, plottitle, outdir, z
 
 
     ax2.plot(np.linspace(0,1), np.linspace(0,1), 'cornflowerblue', label = 'With Contamination')
-    ax2.plot(np.linspace(0,1), np.linspace(0,1), 'k', label = 'Contamination Removed')
+    ax2.plot(np.linspace(0,1), np.linspace(0,1), 'k', label = 'Without Contamination')
     ax2.plot(np.linspace(0,1), np.linspace(0,1), 'hotpink', label = 'Contamination')
     ax2.legend(loc=1)
     # plot any masked regions
@@ -974,7 +974,9 @@ def inspect_object(
     path_to_output=" ",
     path_to_code=" ",
     orientation='combined',
-    comp_fit = False):
+    comp_fit = False,
+    polycont_fit = False,
+    lincont_fit = False):
     
     if verbose == True: print("Running inspect_object...\n")  # MDR 2022/05/17
     """
@@ -1284,6 +1286,8 @@ def inspect_object(
         # apply the mask to the wavelength array
         masked_spec_lam = np.ma.masked_where(np.ma.getmask(spec_val), spec_lam)
         # compress the masked arrays for fitting
+        
+        print('Running the fit with the following settings: zguess = ', zguess, ', fast_fit = ', fast_fit, ', comp_fit = ', comp_fit, ', polycont_fit = ', polycont_fit, ', lincont_fit = ', lincont_fit )
         fit_inputs = [
             np.ma.compressed(masked_spec_lam),
             np.ma.compressed(spec_val),
@@ -1294,7 +1298,9 @@ def inspect_object(
             str(obj),
             ab_image_max,
             fast_fit,
-            comp_fit] 
+            comp_fit,
+            polycont_fit, 
+            lincont_fit] 
         # parsing the input to facilitate parallel processing when fitting is done in batch mode.
         fitresults = fit_obj(fit_inputs)
         zfit = fitresults["redshift"]
@@ -1318,10 +1324,10 @@ def inspect_object(
         ############################################################################
 
         fitmodel = (
-            emissionline_model(fitpars, np.ma.compressed(masked_spec_lam))
+            emissionline_model(fitpars, np.ma.compressed(masked_spec_lam), comp_fit, polycont_fit, lincont_fit)
             * fitresults["scl_factor"])
         contmodel = (
-            emissionline_model(fitpars_nolines, np.ma.compressed(masked_spec_lam))
+            emissionline_model(fitpars_nolines, np.ma.compressed(masked_spec_lam), comp_fit, polycont_fit, lincont_fit)
             * fitresults["scl_factor"])
 
         # the fitting is done on compressed arrays, so we need to
@@ -1423,6 +1429,31 @@ def inspect_object(
             elif fast_fit == True:
                 print("\nWARNING: Still using fast fit mode, type full for refined fit.")
 
+        ### KVN 05-Aug-2024
+        ### Adding option to fit double gaussian to emission lines:
+        elif option.strip().lower() == "2gauss":
+            print('Fitting emission lines as double gaussians. This increases the number of fit parameters and will therefore take longer.\nNOT CURRENTLY FULLY IMPLEMENTED... DO NOT USE ')
+            comp_fit = True
+
+        ### KVN 06-Aug-2024
+        ### Adding option to fit continuum as a polynomial
+        elif option.strip().lower() == "polycont":
+            print('NOT CURRENTLY FULLY IMPLEMENTED... DO NOT USE ')
+            polycont_fit = True
+
+        ### KVN 06-Aug-2024
+        ### Adding option to fit continuum as a line
+        elif option.strip().lower() == "lincont":
+            print('WARNING: the lincont capability is still premilinary! Not tested fully -- if you see issues contact knedkova@stsci.edu.')
+            lincont_fit = True
+
+        ### KVN 06-Aug-2024
+        ### Adding option to fit continuum as a line
+        elif option.strip().lower() == "splinecont":
+            lincont_fit = False
+
+
+
         ### MDR 2022/06/30
         elif option.strip().lower() == "full":
             fast_fit = False
@@ -1515,14 +1546,26 @@ def inspect_object(
                 config_pars["mask_region3"] = maskwave
 
         # change the transition wavelength between the grisms
-        elif option.strip().lower() == "t":
+        elif option.strip().lower() == "t1":
             print_prompt(
                 "The current transition wavelength is: "
-                + str(config_pars["transition_wave"])
-                + "\nEnter the wavelength for the G102 to G141 transition:"
+                + str(config_pars["transition_wave1"])
+                + "\nEnter the wavelength for the G115 to G150 transition:"
             )
             try:
-                config_pars["transition_wave"] = float(input("> "))
+                config_pars["transition_wave1"] = float(input("> "))
+            except ValueError:
+                print_prompt("Invalid entry. Enter wavelength of grism transition.")
+
+        # change the transition wavelength between the grisms
+        elif option.strip().lower() == "t2":
+            print_prompt(
+                "The current transition wavelength is: "
+                + str(config_pars["transition_wave2"])
+                + "\nEnter the wavelength for the G150 to G200 transition:"
+            )
+            try:
+                config_pars["transition_wave2"] = float(input("> "))
             except ValueError:
                 print_prompt("Invalid entry. Enter wavelength of grism transition.")
 
