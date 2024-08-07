@@ -498,7 +498,7 @@ def emissionline_model(pars, x, comps, polycont, lincont):
         pa_18756_broad_idx = 87
 
         number_of_param = pa_18756_broad_idx + 1 # + 1 of highest index. taking the last index and adding two
-        first_node_index = number_of_param # This must be one larger than last line parameter index.   
+        first_node_index_double_gauss = number_of_param # This must be one larger than last line parameter index.   
 
         
         # o2_3727_sig_idx = 51
