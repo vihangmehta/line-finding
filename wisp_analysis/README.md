@@ -20,7 +20,7 @@ redshift cataloger from Nathaniel R. Ross.
 
 ### Prerequisites
 
-* Python 2.7  (Python 3 is not supported)
+* ~~Python 2.7  (Python 3 is not supported)~~ The PASSAGE version has been rewritten in Python 3.11.8 
 * DS9
 * XPA Messaging System
 
