@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
+import glob
 
 
 def gaussian(x, mu, sigma):
@@ -61,69 +62,61 @@ def read_config(config, availgrism='both'):
 
 
 # Creates .reg files for direct and dispersed images
-# Written by Mason Huberty 
+# Written by Mason Huberty and adapted by KVN to work as part of the line finding software
+
+def write_obj_region(parno, path_to_wisp_data, catalog, regfile_name, xoffset, yoffset, w, b_width, b_length): 
+    file = open(path_to_wisp_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + regfile_name, 'a')
+    for i in range(len(catalog)):
+        ra, dec = catalog['ra'][i], catalog['dec'][i]
+        x, y = w.all_world2pix(ra, dec, 1)
+        file.write("box("+str(x-xoffset)+','+str(y-yoffset)+','+str(b_width)+','+str(b_length)+',0.0) # color=red text={'+str(catalog['id'][i])+'} font="times 10 bold italic" textangle=30\n')
+    file.close
+
+
+
+# NOTE - The x & y offset values are specific for NIRISS. 
+#        These will need to be updated for NIRCam data!
 def create_regions(parno, path_to_wisp_data):
-    
-    #Direct image
-    hdul = fits.open(path_to_wisp_data + 'Par' + str(parno) + '_speccat.fits')
+
+    spec_cat = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*spec*.fits")
+    hdul = fits.open(spec_cat[0])
     cat=hdul[1].data
-    f = open('Par' + str(parno) + 'direct.reg','a')
-    for i in range(len(cat['ra'])):
+
+    # Direct image region files
+    f = open(path_to_wisp_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + 'regions_phot.reg','a')
+    for i in range(len(cat)):
         f.write("WCS;circle("+str(cat['ra'][i])+','+str(cat['dec'][i])+',0.5") # color=green text={'+str(cat['id'][i])+' z='+str(round(cat['redshift'][i],3))+'} font="times 10 bold italic" textangle=30\n')
     f.close()
 
     #This and subsequent are for the first order beams. Offsets taken from the config files
-    f = open("Par" + str(parno) + "F115r_grism.reg",'a')
-    w = WCS('Par28_228_f115w-gr150r_drz_sci.fits')
-    for i in range(len(cat['ra'])):
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)
-        f.write("box("+str(x-0.6548681566074263)+','+str(y-33.73739138173772)+',10.0,93.54,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
+    # KVN :  Adding code to first check if the paths exist. Only create region file if filter/orientation is available 
+    f115grism_R = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f115w*gr150r_drz_sci.fits")
+    if len(f115grism_R) != 0:
+        write_obj_region(parno, path_to_wisp_data, cat, "F115r_grism.reg", 0.6548681566074263, 33.73739138173772, w = WCS(f115grism_R[0]), 
+                        b_width = 10.0, b_length = 93.54)
     
-    
-    f = open("Par28F115c_grism.reg",'a')
-    w = WCS('Par28_228_f115w-gr150c_drz_sci.fits')
-    for i in range(len(cat['ra'])):
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)
-        f.write("box("+str(x-31.91107156101387)+','+str(y-1.3922939626209256)+',97.28751330105166,10.0,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
+    f115grism_C = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f115w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
+    if len(f115grism_C) != 0:
+        write_obj_region(parno, path_to_wisp_data, cat, "F115c_grism.reg", 31.91107156101387, 1.3922939626209256, w = WCS(f115grism_C[0]), 
+                        b_width = 97.28751330105166, b_length = 10.0)
 
-
-    f = open("Par28F150r_grism.reg",'a')
-    w = WCS('Par28_228_f150w-gr150r_drz_sci.fits')
-    for i in range(len(cat['ra'])):
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)   
-        f.write("box("+str(x-0.6548681566074263)+','+str(y-106.79254657227568)+',10.0,93.54,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
+    f150grism_R = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f150w*gr150r_drz_sci.fits") # Added KVN 19-Aug-2024
+    if len(f150grism_R) != 0:
+        write_obj_region(parno, path_to_wisp_data, cat, "F150r_grism.reg", 0.6548681566074263, 106.79254657227568, w = WCS(f150grism_R[0]), 
+                        b_width = 10.0, b_length = 93.54)
     
+    f150grism_C = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f150w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
+    if len(f150grism_C) != 0:
+        write_obj_region(parno, path_to_wisp_data, cat, "F150c_grism.reg", 96.44444, 0.6548681566074263, w = WCS(f150grism_C[0]), 
+                        b_width = 93.54, b_length = 10.0)
     
-    f = open("Par28F150c_grism.reg",'a')
-    w = WCS('Par28_228_f150w-gr150c_drz_sci.fits')
-    for i in range(len(cat['ra'])): 
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)
-        f.write("box("+str(x-96.44444)+','+str(y-0.6548681566074263)+',93.54,10.0,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
+    f200grism_R = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f200w*gr150r_drz_sci.fits") # Added KVN 19-Aug-2024
+    if len(f200grism_R) != 0:    
+        write_obj_region(parno, path_to_wisp_data, cat, "F200r_grism.reg", 0.6548681566074263, 204.8370874255101, w = WCS(f200grism_R[0]), 
+                        b_width = 10.0, b_length = 131.78)        
     
-    
-    f = open("Par28F200r_grism.reg",'a')
-    w = WCS('Par28_228_f200w-gr150r_drz_sci.fits')
-    for i in range(len(cat['ra'])):
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)
-        f.write("box("+str(x-0.6548681566074263)+','+str(y-204.8370874255101)+',10.0,131.78,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
-    
-    
-    f = open("Par28F200c_grism.reg",'a')
-    w = WCS('Par28_228_f200w-gr150c_drz_sci.fits')
-    for i in range(len(cat['ra'])):
-        ra, dec = (cat['ra'][i], cat['dec'][i])
-        x, y = w.all_world2pix(ra, dec, 1)
-        f.write("box("+str(x-200.9228)+','+str(y-0.6548681566074263)+',127.806,10.0,0.0) # color=red text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
-    f.close()
-    
+    f200grism_C = glob.glob(path_to_wisp_data + "/Par" + str(parno) + "/DATA/*f200w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
+    if len(f200grism_C) != 0:
+        write_obj_region(parno, path_to_wisp_data, cat, "F200c_grism.reg", 200.9228, 0.6548681566074263, w = WCS(f200grism_C[0]), 
+                        b_width = 127.806, b_length = 10.0)        
     
