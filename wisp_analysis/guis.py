@@ -28,7 +28,7 @@ def showSpec2D_PASSAGE(parno, obid, path_to_wisp_data=""):
     """
 
     def parse_filename(path_to_wisp_data, parno, obid):
-        return path_to_wisp_data + f"Par{parno}/Stamps/Par{parno}_{obid:05d}.2D.fits"
+        return path_to_wisp_data + f"Par{parno}/spec2D/Par{parno}_{obid:05d}.2D.fits"
 
     spec2D_file = parse_filename(path_to_wisp_data, parno, obid)
 
@@ -484,7 +484,7 @@ def show2dNEW(
         # path2dl=par_root_dir + grism + '_DRIZZLE/aXeWFC3_' +grism + '_mef_ID'+str(obid)+'.fits'
         path2dl = (
             par_root_dir
-            + "Stamps/Par"
+            + "spec2D/Par"
             + str(parno)
             + "_"
             + "{:05d}".format(obid)
@@ -496,7 +496,7 @@ def show2dNEW(
             path_to_wisp_data
             + "Par"
             + str(parno)
-            + "/Stamps/Par"
+            + "/spec2D/Par"
             + str(parno)
             + "_"
             + "{:05d}".format(obid)
@@ -509,7 +509,7 @@ def show2dNEW(
         if path_to_wisp_data == " ":
             path2d = (
                 par_root_dir
-                + "Stamps/Par"
+                + "spec2D/Par"
                 + str(parno)
                 + "_"
                 + grism
@@ -523,7 +523,7 @@ def show2dNEW(
                 path_to_wisp_data
                 + "Par"
                 + str(parno)
-                + "/Stamps/Par"
+                + "/spec2D/Par"
                 + str(parno)
                 + "_"
                 + "{:05d}".format(obid)
@@ -632,7 +632,7 @@ def show2dNEW(
             nhdr = newfits[0].header
             pa_aper = nhdr["PA_APER"]
             tiltedgrism = 1
-        print("PA_APER: ", pa_aper)
+        # print("PA_APER: ", pa_aper)
         wcs_in = WCS(header=grinfits[0].header)
         ra = array("d", zerora)
         dec = array("d", zerodec)
