@@ -1,7 +1,7 @@
 import os
 import pdb
 from glob import glob
-from wisp_analysis import *
+from passage_analysis import *
 from astropy.table import Table
 from astropy.io import ascii as asc
 

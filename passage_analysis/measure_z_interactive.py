@@ -53,9 +53,9 @@ import readline
 
 # SQLLite database support for data persistence
 from WISPLFDatabaseManager import WISPLFDatabaseManager as WDBM
-from wisp_analysis import *
-import wisp_analysis as wisp
-from wisp_analysis.guis import showSpec2D_PASSAGE, showDirect_PASSAGE, panDirect_PASSAGE, panDispersed_PASSAGE 
+from passage_analysis import *
+import passage_analysis as passage
+from passage_analysis.guis import showSpec2D_PASSAGE, showDirect_PASSAGE, panDirect_PASSAGE, panDispersed_PASSAGE 
 
 verbose = True  # MDR 2022/05/17
 
@@ -1000,7 +1000,7 @@ def inspect_object(
     allobjects,
     show_dispersed=True,
     stored_fits=False,
-    path_to_wisp_data=" ",
+    path_to_data=" ",
     path_to_output=" ",
     path_to_code=" ",
     orientation='combined',
@@ -1015,7 +1015,7 @@ def inspect_object(
     # set up and filenames
     outdir = "Par%s_output_%s" % (par, user)
 
-    if path_to_wisp_data == " ":
+    if path_to_data == " ":
         specnameg1 = ("Par%i_" + str(obj).zfill(5) + ".G115_1D.dat" % (par)) 
         specnameg2 = ("Par%i_" + str(obj).zfill(5) + ".G150_1D.dat" % (par))
         specnameg3 = ("Par%i_" + str(obj).zfill(5) + ".G200_1D.dat" % (par)) 
@@ -1027,7 +1027,7 @@ def inspect_object(
         specnameg3_C = ("Par%i_" + str(obj).zfill(5) + ".G200_1D_C.dat" % (par)) 
 
     else:
-        base_path = path_to_wisp_data+ "Par"+ str(par)+ "/Spectra/Par"+ str(par)+ "_" + str(obj).zfill(5)
+        base_path = path_to_data+ "Par"+ str(par)+ "/Spectra/Par"+ str(par)+ "_" + str(obj).zfill(5)
         specnameg1 = (base_path + ".G115_1D.dat")
         specnameg2 = (base_path + ".G150_1D.dat")
         specnameg3 = (base_path + ".G200_1D.dat")
@@ -1097,7 +1097,7 @@ def inspect_object(
 
     # =================== Show spec2d new (begin) =====================
 
-    showSpec2D_PASSAGE(par, obj, path_to_wisp_data=path_to_wisp_data)
+    showSpec2D_PASSAGE(par, obj, path_to_data=path_to_data)
 
     # =================== Show spec2d new (end) =====================
 
@@ -1124,7 +1124,7 @@ def inspect_object(
     #panDirect_PASSAGE(x_pix, y_pix)
     ### Updated by KVN because this panning needs to be offset for each grism
     ### See new panDispersed_PASSAGE function in guis.py
-    panDispersed_PASSAGE(obj, parno=par, path_to_wisp=path_to_wisp_data)
+    panDispersed_PASSAGE(obj, parno=par, path_to_data=path_to_data)
 
     # start with a fresh set of config pars
     config_pars = read_config(path_to_code+"/default.config", availgrism=availgrism)
@@ -1332,9 +1332,9 @@ def inspect_object(
         functions below are defined in fitting.py to send these model parameter indices
         back to measure_z_interactive().
         """
-        first_line_index, first_node_index = wisp.get_fitpar_indices()
+        first_line_index, first_node_index = passage.get_fitpar_indices()
         ####### KVN -- line below doesn't work (idk why?), so hard-coding the broad line index. Will need to update. 
-        # first_broad_line_index = wisp.get_broad_indices()
+        # first_broad_line_index = passage.get_broad_indices()
         first_broad_line_index = 51
         
         fitpars_onlybroad[first_line_index:first_broad_line_index] = 0.0 
@@ -1998,7 +1998,7 @@ def inspect_object(
                     g102zeros,
                     user,
                     "linear",
-                    path_to_wisp_data=path_to_wisp_data,
+                    path_to_data=path_to_data,
                 )
             if g141zeros is not None:
                 show2dNEW(
@@ -2008,7 +2008,7 @@ def inspect_object(
                     g141zeros,
                     user,
                     "linear",
-                    path_to_wisp_data=path_to_wisp_data,
+                    path_to_data=path_to_data,
                 )
 
         # change 2d stamp scaling to log
@@ -2021,7 +2021,7 @@ def inspect_object(
                     g102zeros,
                     user,
                     "log",
-                    path_to_wisp_data=path_to_wisp_data,
+                    path_to_data=path_to_data,
                 )
             if g141zeros is not None:
                 show2dNEW(
@@ -2031,7 +2031,7 @@ def inspect_object(
                     g141zeros,
                     user,
                     "log",
-                    path_to_wisp_data=path_to_wisp_data,
+                    path_to_data=path_to_data,
                 )
 
         # change g102 2d stamp scaling to zscale
@@ -2055,7 +2055,7 @@ def inspect_object(
                         "linear",
                         zran1=z1,
                         zran2=z2,
-                        path_to_wisp_data=path_to_wisp_data,
+                        path_to_data=path_to_data,
                     )
 
         # change g141 2d stamp scaling to zscale
@@ -2079,14 +2079,14 @@ def inspect_object(
                         "linear",
                         zran1=z1,
                         zran2=z2,
-                        path_to_wisp_data=path_to_wisp_Data,
+                        path_to_data=path_to_data,
                     )
 
         # recenter full images
         elif option.strip().lower() == "dc":
-            showDirectNEW(obj, par, g141zeros, path_to_wisp_data=path_two_wisp_data)
+            showDirectNEW(obj, par, g141zeros, path_to_data=path_to_data)
             if show_dispersed:  # MB
-                showDispersed(obj, path_to_wisp_data=path_to_wisp_data)
+                showDispersed(obj, path_to_data=path_to_data)
 
         # reload full iamges
         elif option.strip().lower() == "reload":
@@ -2095,10 +2095,10 @@ def inspect_object(
                 par,
                 g141zeros,
                 load_image=True,
-                path_to_wisp_data=path_to_wisp_data,
+                path_to_data=path_to_data,
             )
             if show_dispersed:
-                showDispersed(obj, load_image=True, path_to_wisp_data=path_to_wisp_data)
+                showDispersed(obj, load_image=True, path_to_data=path_to_data)
 
         # reload direct image region files
         elif option.strip().lower() == "dr":
@@ -2292,7 +2292,7 @@ def check_input_objid(objlist, objid, nextup):
 
 def measure_z_interactive(
     linelistfile=" ",
-    path_to_wisp_data=" ",
+    path_to_data=" ",
     path_to_code=" ",
     show_dispersed=True,
     path_to_stored_fits=" ",
@@ -2307,9 +2307,9 @@ def measure_z_interactive(
         for k, v in setcolors.iteritems():
             setcolors[k] = "\033[0m"
 
-    if path_to_wisp_data == " ":
+    if path_to_data == " ":
         ### running from the Spectra directory
-        path_to_wisp_data = "../../"
+        path_to_data = "../../"
 
     # if path_to_stored_fits == ' ':
     #    use_stored_fits  = False
@@ -2373,7 +2373,7 @@ def measure_z_interactive(
         print(os.getcwd())
         print("")
 
-    tmp = glob(path_to_wisp_data + "Par" + str(par) + "/Spectra/*.dat")  # MDR 2022/05/17 and updated KVN 2024/07/31
+    tmp = glob(path_to_data + "Par" + str(par) + "/Spectra/*.dat")  # MDR 2022/05/17 and updated KVN 2024/07/31
     print_prompt(
         "You are about to inspect emission lines identified in parallel field {}".format(parno),
         prompt_type="interim",
@@ -2454,7 +2454,7 @@ def measure_z_interactive(
         print("Creating trace.reg files...\n")  # MDR 2022/05/17
 
     trace102 = open(
-        path_to_wisp_data + "/Par" + str(parno) + "/Spectra/G102_trace.reg", "w"
+        path_to_data + "/Par" + str(parno) + "/Spectra/G102_trace.reg", "w"
     )
     trace102.write(
         'global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\n'
@@ -2465,7 +2465,7 @@ def measure_z_interactive(
     trace102.write("box(9895,0,3290,1,1.62844e-12)\n")
     trace102.close()
     trace141 = open(
-        path_to_wisp_data + "/Par" + str(par) + "/Spectra/G141_trace.reg", "w"
+        path_to_data + "/Par" + str(par) + "/Spectra/G141_trace.reg", "w"
     )
     trace141.write(
         'global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\n'
@@ -2493,9 +2493,9 @@ def measure_z_interactive(
     # find all available cats
 
     try:
-        secats = glob(path_to_wisp_data + "/Par" + str(par) + "/DATA/DIRECT_GRISM/Par*phot*.fits")  # MDR 2022/05/17
+        secats = glob(path_to_data + "/Par" + str(par) + "/DATA/DIRECT_GRISM/Par*phot*.fits")  # MDR 2022/05/17
     except:
-        secats = glob(path_to_wisp_data + "/Par" + str(par) + "/Products/Par*phot*.fits")  # KVN allowing for different path structure (?)
+        secats = glob(path_to_data + "/Par" + str(par) + "/Products/Par*phot*.fits")  # KVN allowing for different path structure (?)
     secats.sort()
     cat = Table.read(secats[0])
 
@@ -2576,7 +2576,7 @@ def measure_z_interactive(
             g102zeroarr,
             user,
             "linear",
-            path_to_wisp_data=path_to_wisp_data,
+            path_to_data=path_to_data,
         )
     else:
         g102zeroarr = None
@@ -2590,7 +2590,7 @@ def measure_z_interactive(
             g141zeroarr,
             user,
             "linear",
-            path_to_wisp_data=path_to_wisp_data,
+            path_to_data=path_to_data,
         )
     else:
         g141zeroarr = None
@@ -2604,7 +2604,7 @@ def measure_z_interactive(
             f200zeroarr,
             user,
             "linear",
-            path_to_wisp_data=path_to_wisp_data,
+            path_to_data=path_to_data,
         )
     else:
         f200zeroarr = None
@@ -2615,14 +2615,14 @@ def measure_z_interactive(
     #     parnos[0],
     #     g102zeroarr,
     #     load_image=True,
-    #     path_to_wisp_data=path_to_wisp_data,
+    #     path_to_data=path_to_data,
     # )
 
     # tbaines: show direct images of PASSAGE data
-    showDirect_PASSAGE(parno=parnos[0], path_to_wisp=path_to_wisp_data)
+    showDirect_PASSAGE(parno=parnos[0], path_to_data=path_to_data)
 
     #     if show_dispersed:  # MB
-    #         showDispersed(objid_unique[0], parnos[0], load_image=True, path_to_wisp_data  = path_to_wisp_data)
+    #         showDispersed(objid_unique[0], parnos[0], load_image=True, path_to_data  = path_to_data)
 
     #### STEP 8:  Loop through objects ############
     #########################################################################
@@ -2785,7 +2785,7 @@ def measure_z_interactive(
                 allobjects,
                 show_dispersed=show_dispersed,
                 stored_fits=inpickles,
-                path_to_wisp_data=path_to_wisp_data, path_to_code=path_to_code)
+                path_to_data=path_to_data, path_to_code=path_to_code)
         else:
             inspect_object(
                 user,
@@ -2802,7 +2802,7 @@ def measure_z_interactive(
                 allobjects,
                 show_dispersed=show_dispersed,
                 stored_fits=False,
-                path_to_wisp_data=path_to_wisp_data, path_to_code=path_to_code)
+                path_to_data=path_to_data, path_to_code=path_to_code)
             # if len(glob.glob(path_to_wisp_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_R.dat')) > 0:
             #     inspect_object(
             #         user,
@@ -2937,7 +2937,7 @@ def measure_z_interactive(
                             allobjects,
                             show_dispersed=show_dispersed,
                             stored_fits=inpickles,
-                            path_to_wisp_data=path_to_wisp_data,path_to_code=path_to_code)
+                            path_to_data=path_to_data,path_to_code=path_to_code)
                     else:
                         inspect_object(
                             user,
@@ -2954,8 +2954,8 @@ def measure_z_interactive(
                             allobjects,
                             show_dispersed=show_dispersed,
                             stored_fits=False,
-                            path_to_wisp_data=path_to_wisp_data, path_to_code=path_to_code)
-                        if len(glob.glob(path_to_wisp_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_R.dat')) > 0:
+                            path_to_data=path_to_data, path_to_code=path_to_code)
+                        if len(glob.glob(path_to_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_R.dat')) > 0:
                             inspect_object(
                                 user,
                                 parnos[0],
@@ -2971,8 +2971,8 @@ def measure_z_interactive(
                                 allobjects,
                                 show_dispersed=show_dispersed,
                                 stored_fits=False,
-                                path_to_wisp_data=path_to_wisp_data, orientation='R')
-                        if len(glob.glob(path_to_wisp_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_C.dat'))> 0:
+                                path_to_data=path_to_data, orientation='R')
+                        if len(glob.glob(path_to_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_C.dat'))> 0:
                             inspect_object(
                                 user,
                                 parnos[0],
@@ -2988,7 +2988,7 @@ def measure_z_interactive(
                                 allobjects,
                                 show_dispersed=show_dispersed,
                                 stored_fits=False,
-                                path_to_wisp_data=path_to_wisp_data, orientation='C')
+                                path_to_data=path_to_data, orientation='C')
 
                 else:
                     break

@@ -1,4 +1,4 @@
-from wisp_analysis import *
+from passage_analysis import *
 
 def initialize_arrays(data, bluecut, redcut):
     """Define and trim initial arrays from a table of input data.

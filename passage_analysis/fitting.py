@@ -1,6 +1,6 @@
 # Import required packages.
 from timeit import default_timer
-from wisp_analysis import * # KVN: bad practice. Will want to update at some point
+from passage_analysis import * # KVN: bad practice. Will want to update at some point
 from mpfit import *         # KVN: bad practice. Will want to update at some point
 from scipy.optimize import curve_fit
 

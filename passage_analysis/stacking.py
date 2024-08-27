@@ -1,4 +1,4 @@
-from wisp_analysis import *
+from passage_analysis import *
 from scipy import interpolate
 import time
 import scipy.integrate as integrate
