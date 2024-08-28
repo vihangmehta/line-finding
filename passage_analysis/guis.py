@@ -27,6 +27,13 @@ def showSpec2D_PASSAGE(parno, obid, path_to_data=""):
     that the data is missing and that display layout is preserved.
     """
 
+    try:
+        secats = glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*phot*.fits")  # MDR 2022/05/17
+    except:
+        secats = glob(path_to_data + "/Par" + str(parno) + "/Products/Par*phot*.fits")  # KVN allowing for different path structure (?)
+
+    
+
     def parse_filename(path_to_data, parno, obid):
         return path_to_data + f"Par{parno}/spec2D/Par{parno}_{obid:05d}.2D.fits"
 
@@ -78,23 +85,22 @@ def showSpec2D_PASSAGE(parno, obid, path_to_data=""):
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
         # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width. Will need to be changed for NIRCam
         # The length is set to the length of the cutout -8 (for 4 pix on each end)
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 39.5 32.5 70 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 41 32.5 62 10# color=green} ")
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
 
     for fno in [6,7,8,9,10]:
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
         # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye. 
         # Will need to be changed for NIRCam
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 49.5 32.5 90 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 48 32.5 76 10# color=green} ")
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
 
     for fno in [11,12,13,14,15]:
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fno))
         # 70 and 33 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye.
         # Will need to be changed for NIRCam
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 70 33 130 10# color=green} ")
+        os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 71.5 33 108 10# color=green} ")
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
-    return
 
 
 def find_file(directory, filename):
