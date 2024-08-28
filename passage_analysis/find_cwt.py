@@ -140,18 +140,18 @@ def find_cwt(lam, flux, err, zeros, fwhm_est_pix, beam_name, config_pars, plotfl
 
     return [lam[real_peaks], flux[real_peaks], npix_real, snr_real, cwarray, cont_filter, lam[peaks], flux[peaks]]
 
-def loop_field_cwt(path_to_wisp_data, path_to_code, parno):
+def loop_field_cwt(path_to_data, path_to_code, parno):
     # no inputs and run from inside the data directory
     # KVN updating this to write the linelist to the 'output' directory... take path to data as input
     if os.path.exists('linelist') == False:
         os.mkdir('linelist')
 
-    print('Looking for spectra here: ', str(path_to_wisp_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat')
-    g115files = glob(str(path_to_wisp_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat') # looking for 3 spectra for PASSAGE
+    print('Looking for spectra here: ', str(path_to_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat')
+    g115files = glob(str(path_to_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat') # looking for 3 spectra for PASSAGE
     g115files.sort()
-    g150files = glob(str(path_to_wisp_data)+'Par'+str(parno)+'/Spectra/*G150_1D.dat')
+    g150files = glob(str(path_to_data)+'Par'+str(parno)+'/Spectra/*G150_1D.dat')
     g150files.sort()
-    g200files = glob(str(path_to_wisp_data)+'Par'+str(parno)+'/Spectra/*G200_1D.dat')
+    g200files = glob(str(path_to_data)+'Par'+str(parno)+'/Spectra/*G200_1D.dat')
     g200files.sort()
 
     # M.D.R. - 10/08/2020
@@ -159,8 +159,8 @@ def loop_field_cwt(path_to_wisp_data, path_to_code, parno):
     print('Searching for default.config at: ' + str(path_to_code))
     config_pars = read_config(str(path_to_code)+'/default.config')
     
-    print('Searching for catalogs at: ' + str(path_to_wisp_data) +'Par'+str(parno)+'/DATA/DIRECT_GRISM/Par'+str(parno)+'_phot*.fits')
-    catalogs = glob(str(path_to_wisp_data) +'Par'+str(parno)+'/DATA/DIRECT_GRISM/Par'+str(parno)+'_phot*.fits') # get list of available catalogs
+    print('Searching for catalogs at: ' + str(path_to_data) +'Par'+str(parno)+'/DATA/DIRECT_GRISM/Par'+str(parno)+'_phot*.fits')
+    catalogs = glob(str(path_to_data) +'Par'+str(parno)+'/DATA/DIRECT_GRISM/Par'+str(parno)+'_phot*.fits') # get list of available catalogs
     catalogs.sort()
     print('')
     print('I found the following catalogs: ' + str(catalogs))
