@@ -1,4 +1,5 @@
 import passage_analysis as passage
+from passage_analysis import utilities
 import os
 import re
 import glob
@@ -34,7 +35,7 @@ if __name__ == "__main__":
     regionfiles = glob.glob(DATA_DIR + "Par" + str(parno) + "/DATA/*.reg")
     if len(regionfiles) == 0:
         print('\033[94m' + "No region files found, creating those for you now."  + '\033[0m')
-        create_regions(parno = parno, path_to_data = DATA_DIR)
+        utilities.create_regions(parno = parno, path_to_data = DATA_DIR)
 
     # check if line list exists. If not, run code to create the linelist
     print(OUTPUT_DIR + "/linelist/Par"+str(parno)+"lines.dat")
