@@ -366,9 +366,11 @@ def get_remaining_objects(full_obj_list, objid_done):
     return remaining
 
 
+
 def print_help_message():
     """
     Just putting this here to keep it out of the way.
+    -- modified by FH 11/18/24
     """
     msg = setcolors["helpmsg"] + "Available Options:\n"
     msg += setcolors["heading"] + "\tOBJECT SPECIFIC OPTIONS:\n"
@@ -382,13 +384,18 @@ def print_help_message():
         "\treset = reset interactive options back to default for this object\n"
         "\ts = print the (in progress) object summary\n\n"
     )
+    # Look at the full line list and select which 
     msg += setcolors["heading"] + "\tEMISSION LINE SPECIFIC OPTIONS:\n"
     msg += (
         setcolors["helpmsg"] + "\tz = enter a different z guess\n"
         "\tw = enter a different emission line wavelength guess\n"
-        "\tha,  or hb, o31, o32, o2, s2, s31, s32 = change redshift guess\n"
         "\tdz = change the allowable redshift difference between lines\n"
-        "\tn = skip to next brightest line found in this object\n\n"
+        "\tn = skip to next brightest line found in this object\n"
+        "\t2gauss = double gaussian profile for the line being fitted\n"
+        "\t1gauss = option to go back to 1 gaussian fit after selecting 2 gaussian fit\n"
+        "\tha, hb, hg, o31, o32, o2, s2, s31, s32, lya, c4, pb, pa, pg = change strongest emission line\n"
+        "\tPlease see the README file in the top-level directory for the full list of lines and their corresponding commands\n\n"
+
     )
     msg += setcolors["heading"] + "\tSPECTRUM SPECIFIC OPTIONS:\n"
     msg += (
@@ -397,8 +404,19 @@ def print_help_message():
         "\tm1, m2, or m3 = mask up to three discontinuous wavelength regions\n"
         "\tnodes = change the wavelengths for the continuum spline nodes\n"
         "\taddnodes = add wavelengths for the continuum spline nodes\n"
+        "\trmnodes = remove wavelengths from the continuum spline nodes\n"
+        "\tshiftallnodes = SHIFT ALL nodes used for the continuum spline by some wavelength \n"
         "\tbluecut = change the blue cutoff of the F115W grism\n"
-        "\tredcut  = change the red cutoff of the F200W grism\n\n"
+        "\tredcut  = change the red cutoff of the F200W grism\n"
+        "\tlincont = fit continuum as a line\n"
+        "\tpolycont = fit continuum as a higher-order polynomial\n"
+        "\tsplinecont = fit continuum as a spline (piecewise) polynomial\n"
+        "\tgrismr = use only Grism-R spectrum for line-fitting\n"
+        "\tgrismrcontam = use only Grism-R spectrum (with contamination) for line-fitting\n"
+        "\tgrismc = use only Grism-C spectrum for line-fitting\n"
+        "\tgrismccontam = use only Grism-C spectrum (with contamination) for line-fitting\n"
+        "\tcomb = Use combined spectrum (default)\n"
+        "\tcombcontam = Use combined spectrum with contamination\n\n"
     )
     msg += setcolors["heading"] + "\tDS9 SPECIFIC OPTIONS:\n"
     msg += (
@@ -417,6 +435,7 @@ def print_help_message():
     )
 
     print(msg)
+
 
 
 def check_masked_lines(fitresults, snr_meas_array, spdata, flux_strings):
