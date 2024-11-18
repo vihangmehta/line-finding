@@ -38,8 +38,20 @@ You can download and install XPA from
 
 If you are using a Mac and run into trouble, try these [tips](http://staff.washington.edu/rowen/ds9andxpa.html#Installing). 
 
-For more information about XPA, see the help pages [here](http://hea-www.harvard.edu/RD/xpa/).
+In short, the following steps are required for installing XPA:
 
+First, Git clone from the GitHub repo above; e.g., git clone https://github.com/ericmandel/xpa
+
+Then, cd into the xpa directory, followed by the following steps:
+
+	./configure	--prefix=<top_level_install_dir>
+	make			# build the software
+	make install		# install it
+	make clean		# clean up unneeded temp files
+
+..where <top_level_install_dir> is the directory where xpa is cloned.
+
+For detailed instructions, please see [this page](https://github.com/ericmandel/xpa/blob/master/INSTALL).
 
 ### Setting up wisp_analysis
 Either download and unzip the repo, or clone it:
