@@ -24,8 +24,10 @@ redshift cataloger from Nathaniel R. Ross.
 * DS9
 * XPA Messaging System
 
-We recommend using [astroconda](https://astroconda.readthedocs.io/en/latest/) - 
-the Conda channel maintained by STScI. Everything should also work if you are 
+  
+~~We recommend using [astroconda](https://astroconda.readthedocs.io/en/latest/) - 
+the Conda channel maintained by STScI.~~
+UPDATE: We recommend using the Conda environment [stenv](https://stenv.readthedocs.io/en/latest/) managed by STScI. Everything should also work if you are 
 managing your own Python distribution or are using 
 [Ureka](http://ssb.stsci.edu/ureka/).
 
