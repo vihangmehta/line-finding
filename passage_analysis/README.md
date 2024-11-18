@@ -44,12 +44,12 @@ First, Git clone from the GitHub repo above; e.g., git clone https://github.com/
 
 Then, cd into the xpa directory, followed by the following steps:
 
-	./configure	--prefix=<top_level_install_dir>
+	./configure --prefix=<top_level_install_dir>
 	make			# build the software
 	make install		# install it
 	make clean		# clean up unneeded temp files
 
-..where <top_level_install_dir> is the directory where xpa is cloned.
+... where <top_level_install_dir> is the directory where xpa is cloned.
 
 For detailed instructions, please see [this page](https://github.com/ericmandel/xpa/blob/master/INSTALL).
 
