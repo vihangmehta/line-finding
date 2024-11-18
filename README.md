@@ -71,7 +71,6 @@ grismc = use only Grism-C spectrum for line-fitting
 grismccontam = use only Grism-C spectrum (with contamination) for line-fitting
 comb = Use combined spectrum (default)
 combcontam = Use combined spectrum with contamination
-user = previous user-defined fit
 
 **DS9 SPECIFIC OPTIONS:**  
 
