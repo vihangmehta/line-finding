@@ -1506,7 +1506,7 @@ def inspect_object(
         ### KVN 05-Aug-2024
         ### Adding option to fit double gaussian to emission lines:
         elif option.strip().lower() == "2gauss":
-            print('Fitting emission lines as double gaussians. This increases the number of fit parameters and will therefore take longer.\nNOT CURRENTLY FULLY IMPLEMENTED... DO NOT USE ')
+            print('Fitting emission lines as double gaussians. This increases the number of fit parameters and will take longer.\nCURRENTLY BEING IMPLEMENTED/TESTED. USE WITH CAUTION. ')
             comp_fit = True
 
         ### KVN 12-Aug-2024
@@ -1711,7 +1711,7 @@ def inspect_object(
                     node_arr_add.append(float(nodelam))
             except ValueError:
                 print_prompt(
-                    "Invalid entry, possibly because. Enter wavelengths separated by commas"
+                    "Invalid entry. Enter wavelengths separated by commas"
                 )
             node_arr_add = np.array(node_arr_add)
             # remove any added nodes that are outside the blue/red cutoff
@@ -2102,22 +2102,17 @@ def inspect_object(
                     )
 
         # recenter full images
+        # Updated for PASSAGE KVN 19-Nov-2024
         elif option.strip().lower() == "dc":
-            showDirectNEW(obj, par, g141zeros, path_to_data=path_to_data)
+            panDirect_PASSAGE(ra, dec)
             if show_dispersed:  # MB
-                showDispersed(obj, path_to_data=path_to_data)
+                panDispersed_PASSAGE(obj, parno=par, path_to_data=path_to_data)
 
         # reload full iamges
+        # Updated for PASSAGE KVN 19-Nov-2024
         elif option.strip().lower() == "reload":
-            showDirectNEW(
-                obj,
-                par,
-                g141zeros,
-                load_image=True,
-                path_to_data=path_to_data,
-            )
-            if show_dispersed:
-                showDispersed(obj, load_image=True, path_to_data=path_to_data)
+            showDirect_PASSAGE(par, path_to_data=path_to_data)
+            showSpec2D_PASSAGE(par, obj, path_to_data=path_to_data)
 
         # reload direct image region files
         elif option.strip().lower() == "dr":
