@@ -127,7 +127,7 @@ def showDirect_PASSAGE(parno, path_to_data=""):
     # specify the images to be displayed in DS9
     grism_file = glob(path_to_data + '/Par'+str(parno)+'/DATA/*gr150*_drz_sci.fits')
     grism_file = str(grism_file[0]).split(path_to_data)[1]
-    grism_file_ext = grism_file[0].split('_')[1]
+    grism_file_ext = str(grism_file).split('_')[1]
 
     # specify the images to be displayed in DS9
     images = {
