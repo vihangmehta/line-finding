@@ -1493,13 +1493,12 @@ def inspect_object(
                     print("\nWARNING: Still using fast fit mode, type full for refined fit.")
 
             elif comp_fit == False:
-                print("\nWARNING: Double Gaussian fit is recommended. Do you want to accept the single Gaussian fit anyway? [y/N]")
-                if option.strip().lower() == "y":
-                    if fast_fit == False:
-                        done = 1
-                        zset = 1
-                        flagcont = 1
-                    elif fast_fit == True:
+                print("\n--- You are accepting the single Gaussian fit ---")
+                if fast_fit == False:
+                    done = 1
+                    zset = 1
+                    flagcont = 1
+                elif fast_fit == True:
                         print("\nWARNING: Still using fast fit mode, type full for refined fit.")
 
 
@@ -2225,7 +2224,7 @@ def inspect_object(
             elif comp_fit == True:
                 writeToCatalog2gauss(
                     linelistoutfile, par, obj,ra, dec, a_image, b_image,
-                    jmag, hmag, snr_tot_others, fitresults, contamflags)
+                    jmag, hmag, snr_tot_others, fitresults, contamflags, comp_fit)
     
                 writeFitdata(
                     fitdatafilename,
@@ -3032,7 +3031,7 @@ def measure_z_interactive(
         os.unlink("G141_trace.reg")
 
 
-# parnos, objid are scalar not array.
+# # parnos, objid are scalar not array.
 def writeToCatalog(
     catalogname,
     parnos,
@@ -3387,7 +3386,12 @@ def writeToCatalog2gauss(
     hmag_obj,
     snr_tot_others,
     fitresults,
-    contamflags):
+    contamflags,
+    comp_fit):
+
+    if comp_fit == False:
+        ratios = 0
+    
     if not os.path.exists(catalogname):
         cat = open(catalogname, "w")
         cat.write("#1 objid \n")
@@ -3404,13 +3408,14 @@ def writeToCatalog2gauss(
         cat.write("#12 fwhm_muse_error \n")
         cat.write("#13 fwhm_g141 \n")
         cat.write("#14 fwhm_g141_error \n")
-        cat.write("#15 la_1216_dz \n")
-        cat.write("#16 c4_1548_dz \n")
-        cat.write("#17 uv_line_dz \n")
-        cat.write("#18 m2_2796_dz \n")
-        cat.write("#19 o2_3727_dz \n")
-        cat.write("#20 o3_5007_dz \n")
-        cat.write("#21 s3_he_dz \n")
+        cat.write("#15 2Gauss_fit \n")
+        cat.write("#16 la_1216_dz \n")
+        cat.write("#17 c4_1548_dz \n")
+        cat.write("#18 uv_line_dz \n")
+        cat.write("#19 m2_2796_dz \n")
+        cat.write("#20 o2_3727_dz \n")
+        cat.write("#21 o3_5007_dz \n")
+        cat.write("#22 s3_he_dz \n")
 
         
         # flux_strings_2gauss = [
@@ -3448,7 +3453,7 @@ def writeToCatalog2gauss(
             "c4_1548",
             "c4_1550",
             "c4_1548_1550",
-            "h2_1640",
+            "h2_1640tot", 
             "o3_1660",
             "o3_1666",
             "o3_1660_1666",
@@ -3489,7 +3494,7 @@ def writeToCatalog2gauss(
             "pb_12822",
             "pa_18756"]
 
-        results_idx = 22
+        results_idx = 23
 
         for line in result_lines:
             cat.write("#" + str(results_idx + 0) + " " + line + "_flux \n")
@@ -3516,6 +3521,7 @@ def writeToCatalog2gauss(
         + "{:>10.2f}".format(fitresults["fwhm_muse_error"])
         + "{:>10.2f}".format(fitresults["fwhm_g141"])
         + "{:>10.2f}".format(fitresults["fwhm_g141_error"])
+        + "{:>s}".format(str(comp_fit))
         + "{:>10.5f}".format(fitresults["la_1216_dz"])
         + "{:>10.5f}".format(fitresults["c4_1548_dz"])
         + "{:>10.5f}".format(fitresults["uv_line_dz"])
@@ -3559,9 +3565,9 @@ def writeToCatalog2gauss(
         + "{:>13.2e}".format(fitresults["c4_1548_1550_error"])
         + "{:>13.2e}".format(fitresults["c4_1548_1550_ew_obs"])
         + "{:>6d}".format(np.max([contamflags["c4_1548"], contamflags["c4_1550"]]))
-        + "{:>13.2e}".format(fitresults["h2_1640_flux"])
-        + "{:>13.2e}".format(fitresults["h2_1640_error"])
-        + "{:>13.2e}".format(fitresults["h2_1640_ew_obs"])
+        + "{:>13.2e}".format(fitresults["h2_1640tot_flux"])
+        + "{:>13.2e}".format(fitresults["h2_1640tot_error"])
+        + "{:>13.2e}".format(fitresults["h2_1640tot_ew_obs"])
         + "{:>6d}".format(contamflags["h2_1640"])
         + "{:>13.2e}".format(fitresults["o3_1660_flux"])
         + "{:>13.2e}".format(fitresults["o3_1660_error"])
