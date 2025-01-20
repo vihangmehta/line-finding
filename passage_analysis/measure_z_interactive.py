@@ -1035,27 +1035,27 @@ def inspect_object(
     outdir = "Par%s_output_%s" % (par, user)
 
     if path_to_data == " ":
-        specnameg1 = ("Par%i_" + str(obj).zfill(5) + ".G115_1D.dat" % (par)) 
-        specnameg2 = ("Par%i_" + str(obj).zfill(5) + ".G150_1D.dat" % (par))
-        specnameg3 = ("Par%i_" + str(obj).zfill(5) + ".G200_1D.dat" % (par)) 
-        specnameg1_R = ("Par%i_" + str(obj).zfill(5) + ".G115_1D_R.dat" % (par)) 
-        specnameg2_R = ("Par%i_" + str(obj).zfill(5) + ".G150_1D_R.dat" % (par)) 
-        specnameg3_R = ("Par%i_" + str(obj).zfill(5) + ".G200_1D_R.dat" % (par)) 
-        specnameg1_C = ("Par%i_" + str(obj).zfill(5) + ".G115_1D_C.dat" % (par)) 
-        specnameg2_C = ("Par%i_" + str(obj).zfill(5) + ".G150_1D_C.dat" % (par)) 
-        specnameg3_C = ("Par%i_" + str(obj).zfill(5) + ".G200_1D_C.dat" % (par)) 
+        specnameg1 = ("Par%i_" + str(obj).zfill(5) + ".specG115_1D.dat" % (par))
+        specnameg2 = ("Par%i_" + str(obj).zfill(5) + ".specG150_1D.dat" % (par))
+        specnameg3 = ("Par%i_" + str(obj).zfill(5) + ".specG200_1D.dat" % (par))
+        specnameg1_R = ("Par%i_" + str(obj).zfill(5) + ".specG115_1D_R.dat" % (par))
+        specnameg2_R = ("Par%i_" + str(obj).zfill(5) + ".specG150_1D_R.dat" % (par))
+        specnameg3_R = ("Par%i_" + str(obj).zfill(5) + ".specG200_1D_R.dat" % (par))
+        specnameg1_C = ("Par%i_" + str(obj).zfill(5) + ".specG115_1D_C.dat" % (par))
+        specnameg2_C = ("Par%i_" + str(obj).zfill(5) + ".specG150_1D_C.dat" % (par))
+        specnameg3_C = ("Par%i_" + str(obj).zfill(5) + ".specG200_1D_C.dat" % (par))
 
     else:
         base_path = path_to_data+ "Par"+ str(par)+ "/Spectra/Par"+ str(par)+ "_" + str(obj).zfill(5)
         specnameg1 = (base_path + ".specG115_1D.dat")
         specnameg2 = (base_path + ".specG150_1D.dat")
         specnameg3 = (base_path + ".specG200_1D.dat")
-        specnameg1_R = (base_path + ".F115W_1D_R.dat")
-        specnameg2_R = (base_path + ".F150W_1D_R.dat")
-        specnameg3_R = (base_path + ".F200W_1D_R.dat")
-        specnameg1_C = (base_path + ".F115W_1D_C.dat")
-        specnameg2_C = (base_path + ".F150W_1D_C.dat")
-        specnameg3_C = (base_path + ".F200W_1D_C.dat")
+        specnameg1_R = (base_path + ".specG115_1D_R.dat")
+        specnameg2_R = (base_path + ".specG150_1D_R.dat")
+        specnameg3_R = (base_path + ".specG200_1D_R.dat")
+        specnameg1_C = (base_path + ".specG115_1D_C.dat")
+        specnameg2_C = (base_path + ".specG150_1D_C.dat")
+        specnameg3_C = (base_path + ".specG200_1D_C.dat")
 
     plottitle = "PASSAGE_%i" % (obj)
     fitdatafilename = os.path.join(outdir, "fitdata/%s_fitspec" % plottitle)
@@ -3932,7 +3932,7 @@ def writeComments(filename, parnos, objid, comment):
     else:
         cat = open(filename, "a")
 
-    outstr = "{:<8d}".format(parnos) + "{:<6d}".format(objid) + comment + "\n"
+    outstr = f"Par: {parnos} ID: {objid:<6d}" + comment + "\n"
 
     cat.write(outstr)
     cat.close()

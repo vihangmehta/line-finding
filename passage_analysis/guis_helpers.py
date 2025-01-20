@@ -140,6 +140,10 @@ def display_image_in_DS9(frame_number, image_file, region_file, verbose=True):
     # add ,region file if ggiven
     ds9_title = "PASSAGE_DIRECT"
 
+    if image_file is None:
+        os.system(f"xpaset -p {ds9_title} frame {frame_number}")
+        return
+
     if verbose:
         msg = f"Opening F{frame_number}: {os.path.basename(image_file)} | Region File: {region_file}"
         print(msg)
@@ -178,6 +182,7 @@ def display_images_in_DS9(images, region_files, root=None, verbose=True):
     """
 
     frame_num = 0
+    image_dict = {}
     for i, (filter_name, filter_images) in enumerate(images.items(), start=1):
         for j, image_file in enumerate(filter_images, start=1):
             # print(f"(i, j) | ({i}, {j})")
@@ -185,6 +190,7 @@ def display_images_in_DS9(images, region_files, root=None, verbose=True):
             # col = (j - 1) % 3 + 1  # Calculate column number
             # frame_num = (i - 1) * 3 + (row - 1) * 3 + col
             frame_num += 1
+            image_dict[frame_num] = {}
 
             # Build full paths to image and region files
             # this step should be removed doing to much
@@ -208,6 +214,8 @@ def display_images_in_DS9(images, region_files, root=None, verbose=True):
             if not os.path.isfile(image_path):
                 if verbose:
                     print(f"Error: Image file {image_path} does not exist.")
+                image_dict[frame_num]["img"] = None
+                image_dict[frame_num]["reg"] = None
                 continue
 
             # Check if the region file exists
@@ -225,7 +233,13 @@ def display_images_in_DS9(images, region_files, root=None, verbose=True):
                 region_file = None
 
             # Display the image
-            display_image_in_DS9(frame_num, image_path, region_file, verbose=verbose)
+            image_dict[frame_num]["img"] = image_path
+            image_dict[frame_num]["reg"] = region_file
+
+    for frame_num in image_dict:
+        display_image_in_DS9(frame_num,
+                             image_dict[frame_num]["img"],
+                             image_dict[frame_num]["reg"], verbose=verbose)
 
     ds9_title = "PASSAGE_DIRECT"
     # Go to frame 1
