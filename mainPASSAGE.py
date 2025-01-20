@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     # check if line list exists. If not, run code to create the linelist
     print(OUTPUT_DIR + "/linelist/Par"+str(parno)+"lines.dat")
-    linelist = glob.glob(OUTPUT_DIR + "/linelist/Par"+str(parno)+"lines.dat")
+    linelist = glob.glob(DATA_DIR + "/linelist/Par"+str(parno)+"lines.dat")
     if len(linelist) == 0:
         print('\033[94m' + "No line list file found, creating the line list for you now." + '\033[0m')
         passage.loop_field_cwt(path_to_data=DATA_DIR, path_to_code=CODE_DIR, parno=parno)
