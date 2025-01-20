@@ -12,6 +12,7 @@ CODE_DIR = "/Users/knedkova/Work/2024PASSAGE/passage_analysis"
 OUTPUT_DIR = "/Users/knedkova/Work/2024PASSAGE/output"
 DATA_DIR = "/Users/knedkova/Work/2024PASSAGE/data/"
 
+
 #############################################################
 ####### You should not need to change anything below. #######
 #############################################################
@@ -36,6 +37,11 @@ if __name__ == "__main__":
     if len(regionfiles) == 0:
         print('\033[94m' + "No region files found, creating those for you now."  + '\033[0m')
         utilities.create_regions(parno = parno, path_to_data = DATA_DIR)
+
+    specdatfiles = glob.glob(DATA_DIR + "Par" + str(parno) + "/Spectra/*.dat")
+    if len(specdatfiles) == 0:
+        utilities.add_header_keyword(parno = parno, path_to_data = DATA_DIR)
+        utilities.make_spectra_dat_files(parno = parno, path_to_data = DATA_DIR)
 
     # check if line list exists. If not, run code to create the linelist
     print(OUTPUT_DIR + "/linelist/Par"+str(parno)+"lines.dat")

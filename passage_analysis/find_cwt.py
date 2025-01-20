@@ -143,8 +143,8 @@ def find_cwt(lam, flux, err, zeros, fwhm_est_pix, beam_name, config_pars, plotfl
 def loop_field_cwt(path_to_data, path_to_code, parno):
     # no inputs and run from inside the data directory
     # KVN updating this to write the linelist to the 'output' directory... take path to data as input
-    if os.path.exists('linelist') == False:
-        os.mkdir('linelist')
+    if not os.path.exists(os.path.join(path_to_data, 'linelist')):
+        os.system(f"mkdir -p {os.path.join(path_to_data, 'linelist'):s}")
 
     print('Looking for spectra here: ', str(path_to_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat')
     g115files = glob(str(path_to_data)+'Par'+str(parno)+'/Spectra/*G115_1D.dat') # looking for 3 spectra for PASSAGE
@@ -181,7 +181,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
     a_images = cat['a_image']
     beam_se = cat['id']
     
-    outfile = open('linelist/temp', 'w')
+    outfile = open(os.path.join(path_to_data, 'linelist/temp'), 'w')
     #config_pars['transition_wave'] = 11700.
     config_pars['transition_wave'] = 13000. # MDR 2022/08/16
 
@@ -189,13 +189,15 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
     print('Searching for grism files...')
 
     for filename in g115files:
+        print(filename)
         print('starting obj id = ', filename)
         # get spectral data
         spdata = asc.read(filename, names = ['lambda', 'flux', 'ferror', 'contam', 'zero'])
         trimmed_spec = trim_spec(spdata, None, None, config_pars)
 
         # look up the object in the se catalog and grab the a_image
-        beam = float(filename.split('_')[1].split('.')[0])
+        # beam = float(filename.split('_')[1].split('.')[0])
+        beam = float(filename.split('Spectra/Par')[1].split('_')[0])
         parno = parno #os.getcwd().split('/')[-2].split('Par')[-1] # fixed parallel field number to zero for the mudf program
         print('Par Number: ', parno)
 
@@ -250,7 +252,8 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         print('starting obj id = ', filename)
         spdata = asc.read(filename, names = ['lambda', 'flux', 'ferror', 'contam', 'zero'])
         trimmed_spec = trim_spec(None, spdata, None, config_pars)
-        beam = float(filename.split('_')[1].split('.')[0])
+        # beam = float(filename.split('_')[1].split('.')[0])
+        beam = float(filename.split('Spectra/Par')[1].split('_')[0])
         parno = os.getcwd().split('/')[-2].split('Par')[-1] # fixed parallel field number to zero for the mudf program
         w = np.where(beam_se == beam)
         w = w[0]    # because of tuples
@@ -297,7 +300,8 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         print('starting obj id = ', filename)
         spdata = asc.read(filename, names = ['lambda', 'flux', 'ferror', 'contam', 'zero'])
         trimmed_spec = trim_spec(None, None, spdata, config_pars)
-        beam = float(filename.split('_')[1].split('.')[0])
+        # beam = float(filename.split('_')[1].split('.')[0])
+        beam = float(filename.split('Spectra/Par')[1].split('_')[0])
         parno = parno # fixed parallel field number to zero for the mudf program
         w = np.where(beam_se == beam)
         w = w[0]    # because of tuples
@@ -340,7 +344,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         #config_pars['transition_wave'] = 11200.
         config_pars['transition_wave'] = 13000. # MDR 2022/08/16
 
-    tab = asciitable.read('linelist/temp', format = 'no_header')
+    tab = asciitable.read(os.path.join(path_to_data, 'linelist/temp'), format = 'no_header')
     par = tab['col1']
     grism = tab['col2']
     beam = tab['col3']
@@ -355,7 +359,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
     snr = snr[s]
     par = par[0]
     beams_unique = np.unique(beam)
-    outfile = open('linelist/Par'+str(par) + 'lines.dat', 'w')
+    outfile = open(os.path.join(path_to_data, 'linelist/Par'+str(par) + 'lines.dat'), 'w')
 
     for b in beams_unique:
         # do the g102 for b

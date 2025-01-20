@@ -2,7 +2,9 @@ import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
 import glob
-
+import os
+from astropy.table import Table
+import pandas as pd
 
 def gaussian(x, mu, sigma):
     return np.exp(-np.power(x - mu, 2.) / (2. * np.power(sigma, 2.))) # / (sigma * np.sqrt(2. * np.pi))
@@ -145,3 +147,78 @@ def create_regions(parno, path_to_data):
         write_obj_region(parno, path_to_data, cat, "F200c_grism.reg", 200.9228, 0.6548681566074263, w = WCS(f200grism_C[0]), 
                         b_width = 127.806, b_length = 10.0)        
     
+
+def add_header_keyword(parno, path_to_data):
+
+    main_directory = os.path.join(path_to_data, f"Par{parno:s}")
+    files = glob.glob(os.path.join(main_directory, 'spec2D/*.fits'))
+    test_file = fits.open(files[0])
+    header = test_file[2].header
+
+    if header['RADESYS'] != 'ICRS':
+        print('Headers are not updated. Updating all now.')
+        for j in files:
+            # Open the file header for viewing and load the header
+            hdulist = fits.open(j)
+            for i in range(len(hdulist)):
+                header = hdulist[i].header
+                try: header['RADESYS'] = 'ICRS'
+                except: print('no RADESYS in header')
+
+            hdulist.writeto(j, overwrite='True')
+
+def make_spectra_dat_files(parno, path_to_data):
+
+    main_directory = os.path.join(path_to_data, f"Par{parno:s}")
+    spec1D_directory = os.path.join(main_directory, "spec1D")
+
+    os.system(f"mkdir -p {os.path.join(main_directory, 'Spectra'):s}")
+
+    files = sorted(glob.glob(os.path.join(spec1D_directory, '*1D.fits')))
+
+    # Check if converted files already exist. If they do not, carry on with the conversion.
+    # Otherwise, this step can be skipped.
+    # Here, I just check if there are more converted files than objects (there can be 1-3 per object)
+    # depending on how many filters are available for each object
+
+    print('\nThere are ' + str(len(files)) + ' PASSAGE files to convert.\n')
+    for f in files:
+
+        fff = fits.open(f)
+        print(f)
+
+        for ext in range(1, len(fff)):
+
+            ### !!! IMPORTANT !!!
+            ### VM: This is temporary while we fix this in the pipeline
+            ### The R/C spectra have already been treated for the following operations
+            if "EXTVER" not in fff[ext].header:
+
+                tb = Table(fff[ext].data).to_pandas()
+                t_out = pd.DataFrame({})
+
+                t_out['wave'] = tb['wave']
+                t_out['flux'] = tb['flux']/tb['flat']
+                t_out['error'] = tb['err']/tb['flat']
+                t_out['contam'] = tb['contam']/tb['flat']
+                t_out['zeroth'] = np.zeros(len(tb['wave'])).astype('int')
+
+                t_out = Table.from_pandas(t_out)
+                t_out = t_out.filled(0.0) # Replace nans with zeros
+                # Spectra dispersed beyond the chip have zero fluxes that must be replaced to prevent crashes in fitting.
+                t_out['flux'][np.where(t_out['flux'] == 0.0)] = np.median(t_out['flux'][np.where(t_out['flux'] != 0.0)])
+                t_out['error'][np.where(t_out['error'] == 0.0)]=np.median(t_out['error'][np.where(t_out['error'] != 0.0)])
+
+            for filt in ["115", "150", "200"]:
+
+                if fff[ext].header['EXTNAME'] == f'F{filt:s}W' and "EXTVER" not in fff[ext].header:
+                    t_out.write(os.path.join(main_directory, "Spectra",
+                                os.path.basename(f).replace('1D.fits', f'G{filt:s}_1D.dat')),
+                                    format='ascii.fixed_width_two_line', overwrite=True)
+
+                elif fff[ext].header['EXTNAME'] == f'F{filt:s}W' and "EXTVER" in fff[ext].header:
+                    orient = fff[ext].header["FILTER"][-1]
+                    t_out.write(os.path.join(main_directory, "Spectra",
+                                os.path.basename(f).replace('1D.fits', f'G{filt:s}_1D_{orient:s}.dat')),
+                            format='ascii.fixed_width_two_line', overwrite=True)
+

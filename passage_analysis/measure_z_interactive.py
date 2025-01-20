@@ -2412,7 +2412,8 @@ def measure_z_interactive(
     #### STEP 1:   get linelist ###############################################
     ###########################################################################
     if linelistfile == " ":
-        files = glob("linelist/Par"+str(parno)+"lines.dat")
+        print('path_to_data= ', path_to_data, os.getcwd() )
+        files = glob(path_to_data+"/linelist/Par"+str(parno)+"lines.dat")
         if len(files) == 0:
             print_prompt("No line list file found", prompt_type="interim")
             return 0
