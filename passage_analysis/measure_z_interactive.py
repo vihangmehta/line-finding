@@ -1047,9 +1047,9 @@ def inspect_object(
 
     else:
         base_path = path_to_data+ "Par"+ str(par)+ "/Spectra/Par"+ str(par)+ "_" + str(obj).zfill(5)
-        specnameg1 = (base_path + ".G115_1D.dat")
-        specnameg2 = (base_path + ".G150_1D.dat")
-        specnameg3 = (base_path + ".G200_1D.dat")
+        specnameg1 = (base_path + ".specG115_1D.dat")
+        specnameg2 = (base_path + ".specG150_1D.dat")
+        specnameg3 = (base_path + ".specG200_1D.dat")
         specnameg1_R = (base_path + ".F115W_1D_R.dat")
         specnameg2_R = (base_path + ".F150W_1D_R.dat")
         specnameg3_R = (base_path + ".F200W_1D_R.dat")
@@ -1063,19 +1063,22 @@ def inspect_object(
     # read in 1D spectrum
     if os.path.exists(specnameg1):
         availgrism += "g115"
-        tab_blue = asciitable.read(specnameg1, names=["lambda","flux","ferror","contam","zero"])
+        tab_blue = Table.read(specnameg1, format="ascii")
+        tab_blue.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_cont = np.copy(tab_blue)
         tab_blue_cont['flux'] = tab_blue['flux'] + tab_blue['contam']
     else: tab_blue = None; tab_blue_cont = None 
     if os.path.exists(specnameg2):
         availgrism += "g150"
-        tab_mid = asciitable.read(specnameg2, names=["lambda","flux","ferror","contam","zero"])
+        tab_mid = Table.read(specnameg2, format="ascii")
+        tab_mid.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_cont = np.copy(tab_mid)
         tab_mid_cont['flux'] = tab_mid['flux'] + tab_mid['contam']
     else: tab_mid = None; tab_mid_cont = None
     if os.path.exists(specnameg3):
         availgrism += "g200"
-        tab_red = asciitable.read(specnameg3, names=["lambda","flux","ferror","contam","zero"])
+        tab_red = Table.read(specnameg3, format="ascii")
+        tab_red.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_cont = np.copy(tab_red)
         tab_red_cont['flux'] = tab_red['flux'] + tab_red['contam']
     else: tab_red = None; tab_red_cont = None
@@ -1083,33 +1086,39 @@ def inspect_object(
     if availgrism == "g115g150g200": availgrism = "both"  
 
     if os.path.exists(specnameg1_R):
-        tab_blue_R = asciitable.read(specnameg1_R, names=["lambda","flux","ferror","contam","zero"])
+        tab_blue_R = Table.read(specnameg1_R, format="ascii")
+        tab_blue_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_R_cont = np.copy(tab_blue_R)
         tab_blue_R_cont['flux'] = tab_blue_R['flux'] + tab_blue_R['contam']
     else: tab_blue_R = None; tab_blue_R_cont = None
     if os.path.exists(specnameg2_R):
-        tab_mid_R = asciitable.read(specnameg2_R, names=["lambda","flux","ferror","contam","zero"])
+        tab_mid_R = Table.read(specnameg2_R, format="ascii")
+        tab_mid_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_R_cont = np.copy(tab_mid_R)
         tab_mid_R_cont['flux'] = tab_mid_R['flux'] + tab_mid_R['contam']
     else: tab_mid_R = None; tab_mid_R_cont= None
     if os.path.exists(specnameg3_R):
-        tab_red_R = asciitable.read(specnameg3_R, names=["lambda","flux","ferror","contam","zero"])
+        tab_red_R = Table.read(specnameg3_R, format="ascii")
+        tab_red_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_R_cont = np.copy(tab_red_R)
         tab_red_R_cont['flux'] = tab_red_R['flux'] + tab_red_R['contam']
     else: tab_red_R = None; tab_red_R_cont = None
 
     if os.path.exists(specnameg1_C):
-        tab_blue_C = asciitable.read(specnameg1_C, names=["lambda","flux","ferror","contam","zero"])
+        tab_blue_C = Table.read(specnameg1_C, format="ascii")
+        tab_blue_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_C_cont = np.copy(tab_blue_C)
         tab_blue_C_cont['flux'] = tab_blue_C['flux'] + tab_blue_C['contam']
     else: tab_blue_C = None; tab_blue_C_cont = None
     if os.path.exists(specnameg2_C):
-        tab_mid_C = asciitable.read(specnameg2_C, names=["lambda","flux","ferror","contam","zero"])
+        tab_mid_C = Table.read(specnameg2_C, format="ascii")
+        tab_mid_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_C_cont = np.copy(tab_mid_C)
         tab_mid_C_cont['flux'] = tab_mid_C['flux'] + tab_mid_C['contam']
     else: tab_mid_C = None; tab_mid_C_cont = None
     if os.path.exists(specnameg3_C):
-        tab_red_C = asciitable.read(specnameg3_C, names=["lambda","flux","ferror","contam","zero"])
+        tab_red_C = Table.read(specnameg3_C, format="ascii")
+        tab_red_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_C_cont = np.copy(tab_red_C)
         tab_red_C_cont['flux'] = tab_red_C['flux'] + tab_red_C['contam']
     else: tab_red_C = None; tab_red_C_cont = None 
@@ -1236,7 +1245,7 @@ def inspect_object(
     if rejectPrevFit:
         print(" ")
         print_prompt("=" * 72)
-        print_prompt("Par%i Obj %i:" % (par, obj))
+        print_prompt(f"Par{par} Obj {obj:d}:")
         print_prompt("Initial redshift guess: z = %f" % (zguess))
         print_prompt(
             "\nWhat would you like to do with this object?\nSee the README for options, or type 'h' to print them all to the screen."
@@ -2431,7 +2440,7 @@ def measure_z_interactive(
     ###########################################################################
 
     llin = asciitable.read(
-        linelistfile, names=["parnos", "grism", "objid", "wavelen", "npix", "ston"]
+        linelistfile, names=["parnos", "grism", "objid", "wavelen", "npix", "ston"], converters={"parnos": str},
     )
 
     parnos = llin["parnos"]

@@ -7,25 +7,80 @@ from astropy.io import fits
 def extract_image_extensions_key(filename):
 
     # frame number ids
-    frame_ids = np.arange(1, 16)
+    # frame_ids = np.arange(1, 16)
 
-    filter_orientations = [
-        ("F115W,199.0", "SCI"),
-        ("F115W,199.0", "CONTAM"),
-        ("F115W,290.0", "SCI"),
-        ("F115W,290.0", "CONTAM"),
-        ("F115W", "COMB"),
-        ("F150W,199.0", "SCI"),
-        ("F150W,199.0", "CONTAM"),
-        ("F150W,290.0", "SCI"),
-        ("F150W,290.0", "CONTAM"),
-        ("F150W", "COMB"),
-        ("F200W,199.0", "SCI"),
-        ("F200W,199.0", "CONTAM"),
-        ("F200W,290.0", "SCI"),
-        ("F200W,290.0", "CONTAM"),
-        ("F200W", "COMB"),
-    ]
+
+    """
+    VM & AR -- setup dicts for DS9 display purposes
+    """
+    filters = ["F115W", "F150W", "F200W"]
+    orients = ["C", "R"]
+    extnames = ["SCI", "CONTAM"]
+
+    hdu = fits.open(filename)
+
+    ### Get the list of PAs for each filter
+    pa_dict = {}
+    for filt in filters:
+        if f"N{filt:s}" in hdu[0].header:
+            pa_dict[filt] = [hdu[0].header[f"{filt:s}{i+1:02d}"]
+                                for i in range(hdu[0].header[f"N{filt:s}"])]
+
+    ### Map the PAs to R/C orients
+    orient_dict = {}
+    for filt in filters:
+        orient_dict[filt] = {}
+        if filt in pa_dict:
+            for pa in pa_dict[filt]:
+                orient_dict[filt][hdu["SCI", f"{filt:s},{pa:.1f}"].header["GRIS0001"][-1]] = pa
+
+    ### Setup the keys for the DS9 (15 frames)
+    filter_orientations = []
+    for filt in filters:
+        for orient in orients:
+            for extname in extnames:
+                if orient in orient_dict[filt]:
+                    filter_orientations.append((f"{extname:s}", f"{filt:s},{orient_dict[filt][orient]:.1f}"))
+                else:
+                    filter_orientations.append((f"{extname:s}", f"{filt:s},{orient:s}"))
+        filter_orientations.append(("COMB", f"{filt:s}"))
+
+
+    ### Populate with the actual HDUs
+    spec2D_key = {}
+    for val, key in enumerate(filter_orientations):
+        if (",R" in key[1]) or (",C" in key[1]):
+            ext = None
+        elif "COMB" in key:
+            filt = key[1]
+            try:
+                ext = hdu.index_of(("SCI", filt))
+            except KeyError:
+                ext = None
+        else:
+            # ext = hdu[*key[2:-2].split('\", \"')]
+            ext = hdu.index_of(key)
+
+        spec2D_key[key] = {"frame_id": val+1, "ext": ext}
+
+    """
+    # filter_orientations = [
+    #     ("F115W,199.0", "SCI"),
+    #     ("F115W,199.0", "CONTAM"),
+    #     ("F115W,290.0", "SCI"),
+    #     ("F115W,290.0", "CONTAM"),
+    #     ("F115W", "COMB"),
+    #     ("F150W,199.0", "SCI"),
+    #     ("F150W,199.0", "CONTAM"),
+    #     ("F150W,290.0", "SCI"),
+    #     ("F150W,290.0", "CONTAM"),
+    #     ("F150W", "COMB"),
+    #     ("F200W,199.0", "SCI"),
+    #     ("F200W,199.0", "CONTAM"),
+    #     ("F200W,290.0", "SCI"),
+    #     ("F200W,290.0", "CONTAM"),
+    #     ("F200W", "COMB"),
+    # ]
 
     # filter + orientation of SCI, CONTAM, and COMB images and their associated
     # frame number use to plot in DS9.
@@ -33,6 +88,7 @@ def extract_image_extensions_key(filename):
         key: {"frame_id": val, "ext": None}
         for key, val in zip(filter_orientations, frame_ids)
     }
+    print(spec2D_key)
 
     with fits.open(filename) as hdu:
         n_ext = len(hdu)
@@ -57,6 +113,7 @@ def extract_image_extensions_key(filename):
                 # update the master key to be associated with the correct
                 # extension
                 spec2D_key[(header["EXTVER"], extname)]["ext"] = ext
+    """
 
     return spec2D_key
 
@@ -120,12 +177,14 @@ def display_images_in_DS9(images, region_files, root=None, verbose=True):
     None
     """
 
+    frame_num = 0
     for i, (filter_name, filter_images) in enumerate(images.items(), start=1):
         for j, image_file in enumerate(filter_images, start=1):
             # print(f"(i, j) | ({i}, {j})")
-            row = (j - 1) // 3 + 1  # Calculate row number
-            col = (j - 1) % 3 + 1  # Calculate column number
-            frame_num = (i - 1) * 3 + (row - 1) * 3 + col
+            # row = (j - 1) // 3 + 1  # Calculate row number
+            # col = (j - 1) % 3 + 1  # Calculate column number
+            # frame_num = (i - 1) * 3 + (row - 1) * 3 + col
+            frame_num += 1
 
             # Build full paths to image and region files
             # this step should be removed doing to much

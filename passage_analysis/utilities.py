@@ -189,13 +189,13 @@ def make_spectra_dat_files(parno, path_to_data):
 
         for ext in range(1, len(fff)):
 
+            tb = Table(fff[ext].data).to_pandas()
+            t_out = pd.DataFrame(fff[ext].data)
+
             ### !!! IMPORTANT !!!
             ### VM: This is temporary while we fix this in the pipeline
             ### The R/C spectra have already been treated for the following operations
             if "EXTVER" not in fff[ext].header:
-
-                tb = Table(fff[ext].data).to_pandas()
-                t_out = pd.DataFrame({})
 
                 t_out['wave'] = tb['wave']
                 t_out['flux'] = tb['flux']/tb['flat']
@@ -203,11 +203,15 @@ def make_spectra_dat_files(parno, path_to_data):
                 t_out['contam'] = tb['contam']/tb['flat']
                 t_out['zeroth'] = np.zeros(len(tb['wave'])).astype('int')
 
-                t_out = Table.from_pandas(t_out)
-                t_out = t_out.filled(0.0) # Replace nans with zeros
-                # Spectra dispersed beyond the chip have zero fluxes that must be replaced to prevent crashes in fitting.
-                t_out['flux'][np.where(t_out['flux'] == 0.0)] = np.median(t_out['flux'][np.where(t_out['flux'] != 0.0)])
-                t_out['error'][np.where(t_out['error'] == 0.0)]=np.median(t_out['error'][np.where(t_out['error'] != 0.0)])
+            t_out = Table.from_pandas(t_out)
+            ### VM: Explicitly fix nans to 0s
+            for col in t_out.columns:
+                t_out[col][np.isnan(t_out[col])] = 0
+            t_out = t_out.filled(0.0) # Replace nans with zeros
+
+            # Spectra dispersed beyond the chip have zero fluxes that must be replaced to prevent crashes in fitting.
+            t_out['flux'][np.where(t_out['flux'] == 0.0)] = np.median(t_out['flux'][np.where(t_out['flux'] != 0.0)])
+            t_out['error'][np.where(t_out['error'] == 0.0)]=np.median(t_out['error'][np.where(t_out['error'] != 0.0)])
 
             for filt in ["115", "150", "200"]:
 

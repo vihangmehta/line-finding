@@ -35,12 +35,13 @@ def showSpec2D_PASSAGE(parno, obid, path_to_data=""):
     
 
     def parse_filename(path_to_data, parno, obid):
-        return path_to_data + f"Par{parno}/spec2D/Par{parno}_{obid:05d}.2D.fits"
+        return path_to_data + f"Par{parno}/spec2D/Par{parno}_{obid:05d}.spec2D.fits"
 
     spec2D_file = parse_filename(path_to_data, parno, obid)
 
     # for a given data file extract the data information that we want to be displayed in ds9
     spec2D_key_DS9 = extract_image_extensions_key(spec2D_file)
+    print(spec2D_key_DS9)
 
     # display in ds9 instance of a given "title"
     SPEC2D_TITLE_DS9 = "PASSAGE_spec2D"
@@ -133,18 +134,18 @@ def showDirect_PASSAGE(parno, path_to_data=""):
     images = {
         "f115w": [
             f"Par{parno}_f115w_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f115w-gr150c_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f115w-gr150r_drz_sci.fits",
+            f"Par{parno}_f115w-gr150c_drz_sci.fits",
+            f"Par{parno}_f115w-gr150r_drz_sci.fits",
         ],
         "f150w": [
             f"Par{parno}_f150w_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f150w-gr150c_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f150w-gr150r_drz_sci.fits",
+            f"Par{parno}_f150w-gr150c_drz_sci.fits",
+            f"Par{parno}_f150w-gr150r_drz_sci.fits",
         ],
         "f200w": [
             f"Par{parno}_f200w_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f200w-gr150c_drz_sci.fits",
-            f"Par{parno}_{grism_file_ext}_f200w-gr150r_drz_sci.fits",
+            f"Par{parno}_f200w-gr150c_drz_sci.fits",
+            f"Par{parno}_f200w-gr150r_drz_sci.fits",
         ],
     }
 
@@ -176,7 +177,7 @@ def showDirect_PASSAGE(parno, path_to_data=""):
             else:
                 print(f"Warning: File {filename} not found; assuming it lives in path_to_data/data/Par#/DATA.")
                 full_path = find_file(path_to_data + '/Par'+str(parno)+'/DATA/', filename)
-                paths.append(full_path)
+                paths.append(full_path if full_path is not None else "tmp")
                 print(paths)
                 
         image_paths[filter_name] = paths
@@ -191,6 +192,7 @@ def showDirect_PASSAGE(parno, path_to_data=""):
     }
 
     # find the full paths of the region files
+    print(region_files)
     region_paths = {}
     for filter_name, filenames in region_files.items():
         paths = []
@@ -254,7 +256,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
 
     ds9_title = "PASSAGE_DIRECT"
     # since tiles are already assigned, setup by tile rather than grism
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150c_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150c_drz_sci.fits'):
         fno = 2
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F115c')
         
@@ -270,7 +272,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
         os.system(cmd)
 
 
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150r_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150r_drz_sci.fits'):
         fno = 3
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F115r')
 
@@ -284,7 +286,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
         os.system(cmd)
 
 
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f150w-gr150c_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f150w-gr150c_drz_sci.fits'):
         fno = 5
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F150c')
 
@@ -297,7 +299,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
         cmd = "xpaset -p PASSAGE_DIRECT pan to %f %f " % (obj_xs[get_ind[0]], obj_ys[get_ind[0]])
         os.system(cmd)
     
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f150w-gr150r_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f150w-gr150r_drz_sci.fits'):
         fno = 6
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F150r')
 
@@ -310,7 +312,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
         cmd = "xpaset -p PASSAGE_DIRECT pan to %f %f " % (obj_xs[get_ind[0]], obj_ys[get_ind[0]])
         os.system(cmd)
 
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150c_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150c_drz_sci.fits'):
         fno = 8
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F200c')
 
@@ -323,7 +325,7 @@ def panDispersed_PASSAGE(objid, parno, path_to_data):
         cmd = "xpaset -p PASSAGE_DIRECT pan to %f %f " % (obj_xs[get_ind[0]], obj_ys[get_ind[0]])
         os.system(cmd)
 
-    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150r_drz_sci.fits'):
+    if os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150r_drz_sci.fits'):
         fno = 9
         obj_ids, obj_xs, obj_ys = getRegionFileInfo(parno=parno, path_to_data=path_to_data, filt='F200r')
 
@@ -353,8 +355,8 @@ def panDispersed_PASSAGE_doNOTuse(ra, dec, parno, path_to_wisp=""):
     ds9_title = "PASSAGE_DIRECT"    
     # since tiles are already assigned, setup by tile rather than grism
     for fno in [2,3]:
-        if fno == 2 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150c_drz_sci.fits'):
-            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150c_drz_sci.fits'
+        if fno == 2 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150c_drz_sci.fits'):
+            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150c_drz_sci.fits'
             w = WCS(img_path)
             xx, yy = w.all_world2pix(ra, dec, 0) #this gives me the pixel coordinates of the object at (ra, dec) position
             print('f115: ', xx,yy)
@@ -374,8 +376,8 @@ def panDispersed_PASSAGE_doNOTuse(ra, dec, parno, path_to_wisp=""):
             updated_ra, updated_dec = w.all_pix2world(xx-obj_offset* math.sin(pa_rad),  yy, 0)
             cmd = "xpaset -p PASSAGE_DIRECT pan to %f %f wcs degrees" % (updated_ra, updated_dec)
             os.system(cmd)
-        elif fno == 3 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150r_drz_sci.fits'):
-            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f115w-gr150r_drz_sci.fits'
+        elif fno == 3 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150r_drz_sci.fits'):
+            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f115w-gr150r_drz_sci.fits'
             w = WCS(img_path)
             xx, yy = w.all_world2pix(ra, dec, 0) #this gives me the pixel coordinates of the object at (ra, dec) position
 
@@ -384,8 +386,8 @@ def panDispersed_PASSAGE_doNOTuse(ra, dec, parno, path_to_wisp=""):
             os.system(cmd)
 
     for fno in [5,6]:
-        if fno == 5 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f150w-gr150c_drz_sci.fits'):
-            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f150w-gr150c_drz_sci.fits'
+        if fno == 5 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f150w-gr150c_drz_sci.fits'):
+            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f150w-gr150c_drz_sci.fits'
             w = WCS(img_path)
             xx, yy = w.all_world2pix(ra, dec, 0) #this gives me the pixel coordinates of the object at (ra, dec) position
             print('f150: ', xx,yy)
@@ -412,8 +414,8 @@ def panDispersed_PASSAGE_doNOTuse(ra, dec, parno, path_to_wisp=""):
 
 
     for fno in [8,9]:
-        if fno == 8 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150c_drz_sci.fits'):
-            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150c_drz_sci.fits'
+        if fno == 8 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150c_drz_sci.fits'):
+            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150c_drz_sci.fits'
             w = WCS(img_path)
             xx, yy = w.all_world2pix(ra, dec, 0) #this gives me the pixel coordinates of the object at (ra, dec) position
             print('f200: ',xx,yy)
@@ -434,8 +436,8 @@ def panDispersed_PASSAGE_doNOTuse(ra, dec, parno, path_to_wisp=""):
             cmd = "xpaset -p PASSAGE_DIRECT pan to %f %f wcs degrees" % (updated_ra, updated_dec)
             os.system(cmd)
 
-        elif fno == 9 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150r_drz_sci.fits'):
-            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_'+str(grism_file_ext)+ '_f200w-gr150r_drz_sci.fits'
+        elif fno == 9 and os.path.exists(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150r_drz_sci.fits'):
+            img_path = path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+'_f200w-gr150r_drz_sci.fits'
             w = WCS(img_path)
             xx, yy = w.all_world2pix(ra, dec, 0) #this gives me the pixel coordinates of the object at (ra, dec) position
 
@@ -495,7 +497,7 @@ def show2dNEW(
             + str(parno)
             + "_"
             + "{:05d}".format(obid)
-            + ".2D.fits"
+            + ".spec2D.fits"
         )
     else:
         # path2dl = path_to_data + '/Par' + str(parno) +'/' + grism + '_DRIZZLE/aXeWFC3_' +grism + '_mef_ID'+str(obid)+'.fits'
@@ -507,7 +509,7 @@ def show2dNEW(
             + str(parno)
             + "_"
             + "{:05d}".format(obid)
-            + ".2D.fits"
+            + ".spec2D.fits"
         )
 
     if os.path.exists(path2dl) == 1:
@@ -534,7 +536,7 @@ def show2dNEW(
                 + str(parno)
                 + "_"
                 + "{:05d}".format(obid)
-                + ".2D.fits"
+                + ".spec2D.fits"
             )
 
     pix_per_um = 1 / (1e-4 * 46.934)  # GR150R 47.015 for GR150C
@@ -738,7 +740,7 @@ def show2dNEW(
         "point(%.2f,%.2f) # point=cross %i color=yellow text={%.1f}\n"
         % (x_test_new[obid - 1], y_test_new[obid - 1], cross_size, zeromag[obid - 1])
     )
-    if test[0] != []:
+    if len(test[0]) > 0:
         for j in range(0, len(test[0])):
             inputx = x_zp_new[test[0][j]]
             #    inputx=x_zp[test[0][j]]
@@ -975,10 +977,10 @@ def showDispersed(obid, parno, load_image=False, path_to_data=" "):  # MB
     path2dispersed = par_root_dir + "Spectra/DATA/DIRECT_GRISM/"
     ### Using G102.fits instead of G102_drz.fits ###
     path102 = (
-        path2dispersed + "Par" + str(parno) + "_" + str(obid).zfill(5) + ".2D.fits"
+        path2dispersed + "Par" + str(parno) + "_" + str(obid).zfill(5) + ".spec2D.fits"
     )
     path141 = (
-        path2dispersed + "Par" + str(parno) + "_" + str(obid).zfill(5) + ".2D.fits"
+        path2dispersed + "Par" + str(parno) + "_" + str(obid).zfill(5) + ".spec2D.fits"
     )
     path102_0reg = os.path.join(path2dispersed, "G102_0th.reg")
     path102_1reg = os.path.join(path2dispersed, "G102_1st.reg")
