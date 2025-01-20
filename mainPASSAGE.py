@@ -44,7 +44,7 @@ if __name__ == "__main__":
         utilities.make_spectra_dat_files(parno = parno, path_to_data = DATA_DIR)
 
     # check if line list exists. If not, run code to create the linelist
-    print(OUTPUT_DIR + "/linelist/Par"+str(parno)+"lines.dat")
+    print(DATA_DIR + "/linelist/Par"+str(parno)+"lines.dat")
     linelist = glob.glob(DATA_DIR + "/linelist/Par"+str(parno)+"lines.dat")
     if len(linelist) == 0:
         print('\033[94m' + "No line list file found, creating the line list for you now." + '\033[0m')
