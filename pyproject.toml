@@ -7,11 +7,11 @@ name = "passage_analysis"
 # dynamic = ["version"]
 version = "0.5.0"
 authors = [
-  { name="Kalina Nedkova", email="anyone@example.com" },
+  { name="Kalina Nedkova", email="knedkova@stsci.edu" },
 ]
 description = "Software for identification and measurement of line-emitting objects."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
@@ -24,7 +24,7 @@ dependencies = [
     "numpy>=1.26.4",
     "astropy>=5.3",
     "pandas",
-    "scipy",
+    "scipy<=1.14.1",
     "matplotlib"
 ]
 
