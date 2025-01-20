@@ -52,7 +52,7 @@ import matplotlib.patheffects as PathEffects
 import readline
 
 # SQLLite database support for data persistence
-from WISPLFDatabaseManager import WISPLFDatabaseManager as WDBM
+from passage_analysis.WISPLFDatabaseManager import WISPLFDatabaseManager as WDBM
 from passage_analysis import *
 import passage_analysis as passage
 from passage_analysis.guis import showSpec2D_PASSAGE, showDirect_PASSAGE, panDirect_PASSAGE, panDispersed_PASSAGE 

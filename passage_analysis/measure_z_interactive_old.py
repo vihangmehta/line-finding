@@ -46,7 +46,7 @@ import matplotlib.patheffects as PathEffects
 # Explicitly import readline to make the text entry process easier on OSX
 import readline
 # SQLLite database support for data persistence
-from WISPLFDatabaseManager import WISPLFDatabaseManager as WDBM
+from passage_analysis.WISPLFDatabaseManager import WISPLFDatabaseManager as WDBM
 
 from wisp_analysis import *
 
