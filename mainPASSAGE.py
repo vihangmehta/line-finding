@@ -20,7 +20,7 @@ parno = input('\033[94m' + "Enter the number of the parallel field you want to a
 # pull out only the number, in case the user entered e.g. "Par1"
 while True:
     try:
-        parno = int(re.findall(r'\d+', str(parno))[0])
+        parno = re.findall(r'\d+', str(parno))[0]
     except: 
         parno = input('\033[94m' + "A parallel field number is required. Enter the number of the parallel field you want to analyze.\n> " + '\033[0m')
         continue
