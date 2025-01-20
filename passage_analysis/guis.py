@@ -10,8 +10,8 @@ import pandas as pd
 from ast import literal_eval
 
 # PASSAGE gui helpers
-from guis_helpers import extract_image_extensions_key
-from guis_helpers import display_images_in_DS9
+from passage_analysis.guis_helpers import extract_image_extensions_key
+from passage_analysis.guis_helpers import display_images_in_DS9
 
 # xpa resources:
 # https://www.astro.louisville.edu/software/xmccd/archive/xmccd-4.1/xmccd-4.1e/docs/xpa/xpa.pdf
