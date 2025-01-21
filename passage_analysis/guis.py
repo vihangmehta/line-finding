@@ -41,7 +41,6 @@ def showSpec2D_PASSAGE(parno, obid, path_to_data=""):
 
     # for a given data file extract the data information that we want to be displayed in ds9
     spec2D_key_DS9 = extract_image_extensions_key(spec2D_file)
-    print(spec2D_key_DS9)
 
     # display in ds9 instance of a given "title"
     SPEC2D_TITLE_DS9 = "PASSAGE_spec2D"
