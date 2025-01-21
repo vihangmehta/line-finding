@@ -2017,6 +2017,9 @@ def inspect_object(
             zguess = (lamline / pb_12822_vac) - 1.0
         elif option.strip().lower() == "pa":
             zguess = (lamline / pa_18756_vac) - 1.0
+        elif option.strip().lower() == "mg":
+            zguess = (lamline / m2_2796_vac) - 1.0
+
 
         # note contamination
         elif option.strip().lower() == "contam":
