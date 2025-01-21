@@ -528,7 +528,7 @@ def make_tarfile(outdir):
         print("Running make_tarfile...\n")  # MDR 2022/05/17
     """ """
     # copy default.config into output directory to keep a copy
-    shutil.copy("default.config", outdir)
+    shutil.copy(path_to_code+"/default.config", outdir)
     with tarfile.open("%s.tar.gz" % outdir, "w:gz") as tar:
         tar.add(outdir, arcname=os.path.basename(outdir))
 
@@ -1936,7 +1936,8 @@ def inspect_object(
             print_prompt(
                 "Reset configuration parameters, fwhm guess, and zguess to default values"
             )
-            config_pars = read_config("default.config", availgrism=availgrism)
+            print('Resetting parameters to those specified in: ', path_to_code+"/default.config")
+            config_pars = read_config(path_to_code+"/default.config", availgrism=availgrism)
             fwhm_guess = 2.35 * a_image * config_pars["dispersion_red"]
             # reset strongest line, too
             index_of_strongest_line = 0
@@ -1998,6 +1999,8 @@ def inspect_object(
             zguess = (lamline / o2_3730_vac) - 1.0
         elif option.strip().lower() == "hb":
             zguess = (lamline / hb_4863_vac) - 1.0
+        elif option.strip().lower() == "hg":
+            zguess = (lamline / hg_4342_vac) - 1.0
         elif option.strip().lower() == "o31":
             zguess = (lamline / o3_4959_vac) - 1.0
         elif option.strip().lower() == "o32":
