@@ -13,6 +13,11 @@ from passage_analysis import mpfit
 
 # import multiprocessing as mp
 import math
+import scipy
+if scipy.__version__ != "1.14.1":
+    raise ImportError(
+        "SciPy must be version 1.14.1, following discussion in PASSAGE ISSI meeting."
+    )
 from scipy import interpolate
 from scipy import integrate
 

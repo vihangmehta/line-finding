@@ -24,16 +24,16 @@ dependencies = [
     "numpy>=1.26.4",
     "astropy>=5.3",
     "pandas",
-    "scipy<=1.14.1",
+    "scipy==1.14.1",
     "matplotlib"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/jwstwfss/line-finding"
-"Bug Tracker" = "https://github.com/jwstwfss/line-finding"
+"Bug Tracker" = "https://github.com/jwstwfss/line-finding/issues"
 
-[tool.setuptools.package-data]
-"*" = ["*.*"]
+[tool.setuptools.packages.find]
+include = ["passage_analysis"]
 
 # [tool.black]
 # line-length = 88
