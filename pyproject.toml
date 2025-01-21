@@ -24,7 +24,7 @@ dependencies = [
     "numpy>=1.26.4",
     "astropy>=5.3",
     "pandas",
-    "scipy<=1.14.1",
+    "scipy==1.14.1",
     "matplotlib"
 ]
 
