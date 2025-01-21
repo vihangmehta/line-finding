@@ -1556,7 +1556,7 @@ def inspect_object(
             zset = 1
             flagcont = 2
             # add to contamination flags
-            for k, v in contamflags.iteritems():
+            for k, v in contamflags.items():
                 contamflags[k] = contamflags[k] | 1
 
         # change redshift guess
@@ -1945,7 +1945,7 @@ def inspect_object(
             zguess = lamline / ((o2_3727_vac + o2_3730_vac) / 2.0) - 1.0
             # zguess = (lamline / o2_3730_vac) - 1.0
             # reset contamflags
-            for k, v in contamflags.iteritems():
+            for k, v in contamflags.items():
                 contamflags[k] = contamflags[k] & 0
             ### if use stored = true, this should set us back to using the pickle file values
 
@@ -2025,7 +2025,7 @@ def inspect_object(
             cflags = [thing.strip().lower() for thing in cf.split(",")]
             # continuum contamination sets bit 1 for all lines and the continuum itself
             if "c" in cflags:
-                for k, v in contamflags.iteritems():
+                for k, v in contamflags.items():
                     contamflags[k] = contamflags[k] | 2
             cflaglines = [thing for thing in cflags if thing != "c"]
             # specific line contamination sets bit 2 for all lines
@@ -2391,7 +2391,7 @@ def measure_z_interactive(
     # turn off color printing to terminal if required
     if print_colors is False:
         global setcolors
-        for k, v in setcolors.iteritems():
+        for k, v in setcolors.items():
             setcolors[k] = "\033[0m"
 
     if path_to_data == " ":
