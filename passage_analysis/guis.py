@@ -224,7 +224,7 @@ def panDirect_PASSAGE(ra, dec):
         os.system(cmd)
 
         # zoom to
-        cmd = f"xpaset -p {ds9_title} zoom 2"
+        cmd = f"xpaset -p {ds9_title} zoom 2" # changed to zoom 1 on Jan 22. Unclear for now if this is better
         os.system(cmd)
 
 
@@ -236,9 +236,15 @@ def getRegionFileInfo(parno, filt, path_to_data):
                 df = pd.read_csv(path_to_data + '/Par'+str(parno)+'/DATA/Par'+str(parno)+str(filt)+'_grism.reg', sep=' ', engine='python', header=None)
         
                 # pull the id and x & y coord from the region file
-                obj_ids = [i for i in df[3].apply(lambda z: int(z.split('=')[-1].strip('}{')))]
-                obj_xs = df[0].apply(lambda z: literal_eval(z.lstrip('box'))[0])
-                obj_ys = df[0].apply(lambda z: literal_eval(z.lstrip('box'))[1])
+                inds = [i for i in range(len(df)) if df[0][i][0] == 'b']
+                obj_ids = []; obj_xs = []; obj_ys = []
+                for ind in inds:
+                    obj_ids.append(float(df.iloc[ind,3].split('=')[-1].strip('}{')))
+                    obj_xs.append(float(df.iloc[ind,0].split('box(')[1].split(',')[0]))
+                    obj_ys.append(float(df.iloc[ind,0].split('box(')[1].split(',')[1]))
+                #obj_ids = [i for i in df[3].apply(lambda z: int(z.split('=')[-1].strip('}{')))]
+                #obj_xs = df[0].apply(lambda z: literal_eval(z.lstrip('box'))[0])
+                #obj_ys = df[0].apply(lambda z: literal_eval(z.lstrip('box'))[1])
         else:
                 print('No region file found for panning to object')
                 obj_ids = None; obj_xs = None; obj_ys = None

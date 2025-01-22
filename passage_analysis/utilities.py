@@ -91,13 +91,28 @@ def read_config(config, availgrism='both'):
 # Creates .reg files for direct and dispersed images
 # Written by Mason Huberty and adapted by KVN to work as part of the line finding software
 
-def write_obj_region(parno, path_to_data, catalog, regfile_name, xoffset, yoffset, w, b_width, b_length): 
+def write_obj_region(parno, path_to_data, catalog, regfile_name, xoffset, yoffset, w, b_width, b_length, mag_cut, zo_x_offset, zo_y_offset): 
     file = open(path_to_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + regfile_name, 'a')
     for i in range(len(catalog)):
         ra, dec = catalog['ra'][i], catalog['dec'][i]
         x, y = w.all_world2pix(ra, dec, 1)
         file.write("box("+str(x-xoffset)+','+str(y-yoffset)+','+str(b_width)+','+str(b_length)+',0.0) # color=red text={'+str(catalog['id'][i])+'} font="times 10 bold italic" textangle=30\n')
+        
+        if catalog['mag_auto'][i] < mag_cut:
+            file.write("circle("+str(x-zo_x_offset)+','+str(y-zo_y_offset)+',3) # color=blue \n')
     file.close
+
+# KVN: the code below writes the positions of the zero orders in the dispersed images.
+# It is now commented out because it is integrated into write_obj_region()
+# def write_obj_zeroorder(parno, path_to_data, catalog, regfile_name, xoffset, yoffset, w, mag_cut): 
+#     file = open(path_to_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + regfile_name, 'a')
+#     #print(catalog.columns)
+#     for i in range(len(catalog)):
+#         if catalog['mag_auto'][i] < mag_cut:
+#             ra, dec = catalog['ra'][i], catalog['dec'][i]
+#             x, y = w.all_world2pix(ra, dec, 1)
+#             file.write("circle("+str(x-xoffset)+','+str(y-yoffset)+',3) # color=blue \n')
+#     file.close
 
 
 
@@ -105,9 +120,17 @@ def write_obj_region(parno, path_to_data, catalog, regfile_name, xoffset, yoffse
 #        These will need to be updated for NIRCam data!
 def create_regions(parno, path_to_data):
 
+    # spec_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*spec*.fits")
+    # phot_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*phot*.fits")
+    # hdul = fits.open(spec_cat[0]); hdul_phot = fits.open(phot_cat[0])
+    # cat=hdul[1].data; photcat = hdul_phot[1].data
+
     spec_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*spec*.fits")
-    hdul = fits.open(spec_cat[0])
-    cat=hdul[1].data
+    phot_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*phot*.fits")
+    hdul = fits.open(spec_cat[0]); hdul_phot = fits.open(phot_cat[0])
+    cat=hdul[1].data; cat_phot=hdul_phot[1].data
+    
+
 
     # Direct image region files
     f = open(path_to_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + 'regions_phot.reg','a')
@@ -119,33 +142,39 @@ def create_regions(parno, path_to_data):
     # KVN :  Adding code to first check if the paths exist. Only create region file if filter/orientation is available 
     f115grism_R = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f115w*gr150r_drz_sci.fits")
     if len(f115grism_R) != 0:
-        write_obj_region(parno, path_to_data, cat, "F115r_grism.reg", 0.6548681566074263, 33.73739138173772, w = WCS(f115grism_R[0]), 
-                        b_width = 10.0, b_length = 93.54)
+        write_obj_region(parno, path_to_data, cat_phot, "F115r_grism.reg", 0.6548681566074263, 33.73739138173772, w = WCS(f115grism_R[0]), 
+                        b_width = 10.0, b_length = 93.54, mag_cut=26, zo_x_offset=0, zo_y_offset=-215)
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F115r_zeroorder.reg", 0, -215, w = WCS(f115grism_R[0]), mag_cut=26)
     
     f115grism_C = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f115w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
     if len(f115grism_C) != 0:
-        write_obj_region(parno, path_to_data, cat, "F115c_grism.reg", 31.91107156101387, 1.3922939626209256, w = WCS(f115grism_C[0]), 
-                        b_width = 97.28751330105166, b_length = 10.0)
+        write_obj_region(parno, path_to_data, cat_phot, "F115c_grism.reg", 31.91107156101387, 1.3922939626209256, w = WCS(f115grism_C[0]), 
+                        b_width = 97.28751330105166, b_length = 10.0, mag_cut=25, zo_x_offset=-216, zo_y_offset=0)
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F115c_zeroorder.reg", -215, 0, w = WCS(f115grism_C[0]), mag_cut=26)
 
     f150grism_R = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f150w*gr150r_drz_sci.fits") # Added KVN 19-Aug-2024
     if len(f150grism_R) != 0:
-        write_obj_region(parno, path_to_data, cat, "F150r_grism.reg", 0.6548681566074263, 106.79254657227568, w = WCS(f150grism_R[0]), 
-                        b_width = 10.0, b_length = 93.54)
+        write_obj_region(parno, path_to_data, cat_phot, "F150r_grism.reg", 0.6548681566074263, 106.79254657227568, w = WCS(f150grism_R[0]), 
+                        b_width = 10.0, b_length = 93.54, mag_cut=25, zo_x_offset=0, zo_y_offset=-210)
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F150r_zeroorder.reg", 0, -210, w = WCS(f150grism_R[0]), mag_cut=26)
     
     f150grism_C = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f150w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
     if len(f150grism_C) != 0:
-        write_obj_region(parno, path_to_data, cat, "F150c_grism.reg", 96.44444, 0.6548681566074263, w = WCS(f150grism_C[0]), 
-                        b_width = 93.54, b_length = 10.0)
+        write_obj_region(parno, path_to_data, cat_phot, "F150c_grism.reg", 96.44444, 0.6548681566074263, w = WCS(f150grism_C[0]), 
+                        b_width = 93.54, b_length = 10.0, mag_cut=26, zo_x_offset=-211, zo_y_offset=0)
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F150c_zeroorder.reg", -210, 0, w = WCS(f150grism_C[0]), mag_cut=26)
     
     f200grism_R = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f200w*gr150r_drz_sci.fits") # Added KVN 19-Aug-2024
     if len(f200grism_R) != 0:    
-        write_obj_region(parno, path_to_data, cat, "F200r_grism.reg", 0.6548681566074263, 204.8370874255101, w = WCS(f200grism_R[0]), 
-                        b_width = 10.0, b_length = 131.78)        
+        write_obj_region(parno, path_to_data, cat_phot, "F200r_grism.reg", 0.6548681566074263, 204.8370874255101, w = WCS(f200grism_R[0]), 
+                        b_width = 10.0, b_length = 131.78, mag_cut=29, zo_x_offset=0, zo_y_offset=-207)
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F200r_zeroorder.reg", 0, -205, w = WCS(f200grism_R[0]), mag_cut=28)
     
     f200grism_C = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/*f200w*gr150c_drz_sci.fits") # Added KVN 19-Aug-2024
     if len(f200grism_C) != 0:
-        write_obj_region(parno, path_to_data, cat, "F200c_grism.reg", 200.9228, 0.6548681566074263, w = WCS(f200grism_C[0]), 
-                        b_width = 127.806, b_length = 10.0)        
+        write_obj_region(parno, path_to_data, cat_phot, "F200c_grism.reg", 200.9228, 0.6548681566074263, w = WCS(f200grism_C[0]), 
+                        b_width = 127.806, b_length = 10.0, mag_cut=29, zo_x_offset=-210, zo_y_offset=0)        
+        #write_obj_zeroorder(parno, path_to_data, cat_phot, "F200c_zeroorder.reg", -206, 0, w = WCS(f200grism_C[0]), mag_cut=28)
     
 
 def add_header_keyword(parno, path_to_data):
