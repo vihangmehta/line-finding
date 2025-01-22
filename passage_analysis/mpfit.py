@@ -5,6 +5,8 @@ Perform Levenberg-Marquardt least-squares minimization, based on MINPACK-1.
   The original version of this software, called LMFIT, was written in FORTRAN
   as part of the MINPACK-1 package by XXX.
 
+  This version has been specifically modified for the passage_analysis package.
+
   Mitchell Revalski updated this code from Python 2 to 3 on 17 January 2023.
 
   Craig Markwardt converted the FORTRAN code to IDL.  The information for the

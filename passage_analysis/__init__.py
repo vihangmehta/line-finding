@@ -13,10 +13,13 @@ from passage_analysis import mpfit
 
 # import multiprocessing as mp
 import math
-import scipy
-if scipy.__version__ != "1.14.1":
+try:
+    from scipy.signal import cwt as _cwt
+except:
     raise ImportError(
-        "SciPy must be version 1.14.1, following discussion in PASSAGE ISSI meeting."
+        "SciPy version must be <=1.14.1, as required functions"
+        " were removed in later versions. Check the README for "
+        "detailed installation instructions."
     )
 from scipy import interpolate
 from scipy import integrate
