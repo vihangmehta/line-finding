@@ -1067,21 +1067,21 @@ def inspect_object(
     if os.path.exists(specnameg1):
         availgrism += "g115"
         tab_blue = Table.read(specnameg1, format="ascii")
-        tab_blue.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_blue.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_cont = np.copy(tab_blue)
         tab_blue_cont['flux'] = tab_blue['flux'] + tab_blue['contam']
     else: tab_blue = None; tab_blue_cont = None 
     if os.path.exists(specnameg2):
         availgrism += "g150"
         tab_mid = Table.read(specnameg2, format="ascii")
-        tab_mid.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_mid.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_cont = np.copy(tab_mid)
         tab_mid_cont['flux'] = tab_mid['flux'] + tab_mid['contam']
     else: tab_mid = None; tab_mid_cont = None
     if os.path.exists(specnameg3):
         availgrism += "g200"
         tab_red = Table.read(specnameg3, format="ascii")
-        tab_red.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_red.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_cont = np.copy(tab_red)
         tab_red_cont['flux'] = tab_red['flux'] + tab_red['contam']
     else: tab_red = None; tab_red_cont = None
@@ -1090,38 +1090,38 @@ def inspect_object(
 
     if os.path.exists(specnameg1_R):
         tab_blue_R = Table.read(specnameg1_R, format="ascii")
-        tab_blue_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_blue_R.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_R_cont = np.copy(tab_blue_R)
         tab_blue_R_cont['flux'] = tab_blue_R['flux'] + tab_blue_R['contam']
     else: tab_blue_R = None; tab_blue_R_cont = None
     if os.path.exists(specnameg2_R):
         tab_mid_R = Table.read(specnameg2_R, format="ascii")
-        tab_mid_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_mid_R.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_R_cont = np.copy(tab_mid_R)
         tab_mid_R_cont['flux'] = tab_mid_R['flux'] + tab_mid_R['contam']
     else: tab_mid_R = None; tab_mid_R_cont= None
     if os.path.exists(specnameg3_R):
         tab_red_R = Table.read(specnameg3_R, format="ascii")
-        tab_red_R.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_red_R.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_R_cont = np.copy(tab_red_R)
         tab_red_R_cont['flux'] = tab_red_R['flux'] + tab_red_R['contam']
     else: tab_red_R = None; tab_red_R_cont = None
 
     if os.path.exists(specnameg1_C):
         tab_blue_C = Table.read(specnameg1_C, format="ascii")
-        tab_blue_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_blue_C.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_blue_C_cont = np.copy(tab_blue_C)
         tab_blue_C_cont['flux'] = tab_blue_C['flux'] + tab_blue_C['contam']
     else: tab_blue_C = None; tab_blue_C_cont = None
     if os.path.exists(specnameg2_C):
         tab_mid_C = Table.read(specnameg2_C, format="ascii")
-        tab_mid_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_mid_C.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_mid_C_cont = np.copy(tab_mid_C)
         tab_mid_C_cont['flux'] = tab_mid_C['flux'] + tab_mid_C['contam']
     else: tab_mid_C = None; tab_mid_C_cont = None
     if os.path.exists(specnameg3_C):
         tab_red_C = Table.read(specnameg3_C, format="ascii")
-        tab_red_C.rename_columns(["wave", "error", "zeroth"], ["lambda", "ferror", "zero"])
+        tab_red_C.rename_columns(["wave", "ferr", "zeroth"], ["lambda", "ferror", "zero"])
         tab_red_C_cont = np.copy(tab_red_C)
         tab_red_C_cont['flux'] = tab_red_C['flux'] + tab_red_C['contam']
     else: tab_red_C = None; tab_red_C_cont = None 
