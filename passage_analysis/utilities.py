@@ -135,6 +135,8 @@ def create_regions(parno, path_to_data):
     # Direct image region files
     f = open(path_to_data + "/Par" + str(parno) + "/DATA/" + "Par" + str(parno) + 'regions_phot.reg','a')
     for i in range(len(cat)):
+        # A better way to do this is:
+        # e.g. np.savetxt(data, fmt="circle(%f, %f, 0.5\") #color=green text=.....")
         f.write("WCS;circle("+str(cat['ra'][i])+','+str(cat['dec'][i])+',0.5") # color=green text={'+str(cat['id'][i])+' z='+str(round(cat['redshift'][i],3))+'} font="times 10 bold italic" textangle=30\n')
     f.close()
 
@@ -221,10 +223,11 @@ def make_spectra_dat_files(parno, path_to_data):
             tb = Table(fff[ext].data).to_pandas()
             t_out = pd.DataFrame(fff[ext].data)
 
+
             ### !!! IMPORTANT !!!
             ### VM: This is temporary while we fix this in the pipeline
             ### The R/C spectra have already been treated for the following operations
-            if "EXTVER" not in fff[ext].header:
+            if "err" in fff[ext].data.dtype.names:
 
                 t_out['wave'] = tb['wave']
                 t_out['flux'] = tb['flux']/tb['flat']

@@ -391,6 +391,7 @@ def print_help_message():
         "\tw = enter a different emission line wavelength guess\n"
         "\tdz = change the allowable redshift difference between lines\n"
         "\tn = skip to next brightest line found in this object\n"
+        "\tp = move to previous brightest line found in this object\n"
         "\t2gauss = double gaussian profile for the line being fitted\n"
         "\t1gauss = option to go back to 1 gaussian fit after selecting 2 gaussian fit\n"
         "\tha, hb, hg, o31, o32, o2, s2, s31, s32, lya, c4, pb, pa, pg = change strongest emission line\n"
@@ -523,10 +524,12 @@ def write_object_summary(par, obj, fitresults, snr_meas_array, contamflags, comp
     print(msg)
 
 
-def make_tarfile(outdir):
+def make_tarfile(outdir, path_to_code):
     if verbose == True:
         print("Running make_tarfile...\n")  # MDR 2022/05/17
     """ """
+    # 
+    print(path_to_code+"/default.config")
     # copy default.config into output directory to keep a copy
     shutil.copy(path_to_code+"/default.config", outdir)
     with tarfile.open("%s.tar.gz" % outdir, "w:gz") as tar:
@@ -1589,6 +1592,9 @@ def inspect_object(
             )
             try:
                 fwhm_guess = config_pars["dispersion_red"] * float(input("> "))
+                if fwhm_guess <= 0:
+                    print_prompt("FWHM (in pixels) must be larger than zero. Keeping previous FWHM.")
+                    fwhm_guess = fitresults["fwhm_g141"] / config_pars["dispersion_red"]
             except ValueError:
                 print_prompt("Invalid Entry.")
 
@@ -1979,6 +1985,25 @@ def inspect_object(
             nlines_found_cwt = np.size(lamlines_found)
             index_of_strongest_line = index_of_strongest_line + 1
             if index_of_strongest_line < (nlines_found_cwt):
+                lamline = lamlines_found[index_of_strongest_line]
+                # zguess = lamline / 6564.610 - 1.0
+                zguess = lamline / ((o3_5007_vac)) - 1.0
+                # zguess = (lamline / o2_3730_vac) - 1.0
+            else:
+                print_prompt(
+                    "There are no other automatically identified peaks. Select another option."
+                )
+                # stay at current line
+                index_of_strongest_line -= 1
+
+        # change to previous brightest line
+        # added KVN 30-Jan-2025
+        elif option.strip().lower() == "p":
+            nlines_found_cwt = np.size(lamlines_found)
+            if index_of_strongest_line >= 1:
+                index_of_strongest_line = index_of_strongest_line - 1
+            else: print_prompt("Already at the strongest peak.")
+            if nlines_found_cwt > 1 and index_of_strongest_line >= 0:
                 lamline = lamlines_found[index_of_strongest_line]
                 # zguess = lamline / 6564.610 - 1.0
                 zguess = lamline / ((o3_5007_vac)) - 1.0
@@ -2962,58 +2987,45 @@ def measure_z_interactive(
                     wcatalog = np.where(objtable["obj"] == next_obj)
                     objinfo = objtable[wcatalog]
 
-                    if use_stored_fits == True:
-                        ### get pickle files:
-                        inpickles = []
-                        path_pickle1 = (
-                            path_to_stored_fits
-                            + "/Par"
-                            + str(parnos[0])
-                            + "_output_a/fitdata/Par0_"
-                            + str(next_obj)
-                            + "_fitspec.pickle"
-                        )
-                        # path_pickle1 = path_to_stored_fits + '/Par'  + str(parnos[0]) + '_output_mbagley/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle2 = path_to_stored_fits + '/Par'  + str(parnos[0]) +    '_output_marc/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle3 = path_to_stored_fits + '/Par'  + str(parnos[0]) + '_output_claudia/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle4 = path_to_stored_fits + '/Par'  + str(parnos[0]) +     '_output_ben/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle5 = path_to_stored_fits + '/Par'  + str(parnos[0]) +  '_output_vihang/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle6 = path_to_stored_fits + '/Par'  + str(parnos[0]) +  '_output_ivano/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle7 = path_to_stored_fits + '/Par'  + str(parnos[0]) +  '_output_mbeck/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle8 = path_to_stored_fits + '/Par'  + str(parnos[0]) +  '_output_karlenoid/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle9 = path_to_stored_fits + '/Par'  + str(parnos[0]) +  '_output_mjr/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle10 = path_to_stored_fits + '/Par'  + str(parnos[0]) + '_output_sophia/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle11 = '/Volumes/Thunderbay/wisps/mzr_refit/Par'  + str(parnos[0]) + '_output_marc-mzr/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
-                        # path_pickle12 = '/Volumes/Thunderbay/wisps/mzr_refit/Par'  + str(parnos[0]) + '_output_alaina-mzr/fitdata/Par' + str(parnos[0]) + '_BEAM_' + str(next_obj) + '_fitspec.pickle'
+                    ### get pickle files:
+                    ### Note from KVN. field is done so all obj should have pickle files?
+                    inpickles = []
+                    path_pickle1 = (
+                        path_to_stored_fits
+                        + "/Par"
+                        + str(parnos[0])
+                        + "_output_"+str(user)+"/fitdata/PASSAGE_"
+                        + str(next_obj)
+                        + "_fitspec.pickle")
 
-                        ### put new fits first
-                        # if os.path.exists(path_pickle11):
-                        #     inpickles.append(path_pickle11)
-                        # if os.path.exists(path_pickle12):
-                        #     inpickles.append(path_pickle12)
-                        if os.path.exists(path_pickle1):
-                            inpickles.append(path_pickle1)
-                        # if os.path.exists(path_pickle2):
-                        #    inpickles.append(path_pickle2)
-                        # if os.path.exists(path_pickle3):
-                        #    inpickles.append(path_pickle3)
-                        # if os.path.exists(path_pickle4):
-                        #    inpickles.append(path_pickle4)
-                        # if os.path.exists(path_pickle5):
-                        #    inpickles.append(path_pickle5)
-                        # if os.path.exists(path_pickle6):
-                        #    inpickles.append(path_pickle6)
-                        # if os.path.exists(path_pickle7):
-                        #    inpickles.append(path_pickle7)
-                        # if os.path.exists(path_pickle8):
-                        #    inpickles.append(path_pickle8)
-                        # if os.path.exists(path_pickle9):
-                        #    inpickles.append(path_pickle9)
-                        # if os.path.exists(path_pickle10):
-                        #    inpickles.append(path_pickle10)
+                    ### put new fits first
+                    # if os.path.exists(path_pickle11):
+                    #     inpickles.append(path_pickle11)
+                    # if os.path.exists(path_pickle12):
+                    #     inpickles.append(path_pickle12)
+                    if os.path.exists(path_pickle1):
+                        inpickles.append(path_pickle1)
+                    # if os.path.exists(path_pickle2):
+                    #    inpickles.append(path_pickle2)
+                    # if os.path.exists(path_pickle3):
+                    #    inpickles.append(path_pickle3)
+                    # if os.path.exists(path_pickle4):
+                    #    inpickles.append(path_pickle4)
+                    # if os.path.exists(path_pickle5):
+                    #    inpickles.append(path_pickle5)
+                    # if os.path.exists(path_pickle6):
+                    #    inpickles.append(path_pickle6)
+                    # if os.path.exists(path_pickle7):
+                    #    inpickles.append(path_pickle7)
+                    # if os.path.exists(path_pickle8):
+                    #    inpickles.append(path_pickle8)
+                    # if os.path.exists(path_pickle9):
+                    #    inpickles.append(path_pickle9)
+                    # if os.path.exists(path_pickle10):
+                    #    inpickles.append(path_pickle10)
 
-                        if len(inpickles) == 0:
-                            use_stored_fits = False
+                    if len(inpickles) == 0:
+                        use_stored_fits = False
 
                     if use_stored_fits == True:
                         inspect_object(
@@ -3049,45 +3061,11 @@ def measure_z_interactive(
                             show_dispersed=show_dispersed,
                             stored_fits=False,
                             path_to_data=path_to_data, path_to_code=path_to_code)
-                        if len(glob.glob(path_to_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_R.dat')) > 0:
-                            inspect_object(
-                                user,
-                                parnos[0],
-                                next_obj,
-                                objinfo,
-                                lamlines_found,
-                                ston_found,
-                                g102zeroarr,
-                                g141zeroarr,
-                                linelistoutfile,
-                                commentsfile,
-                                remaining_objects,
-                                allobjects,
-                                show_dispersed=show_dispersed,
-                                stored_fits=False,
-                                path_to_data=path_to_data, orientation='R')
-                        if len(glob.glob(path_to_data +'Par'+ str(parnos[0])+ '/Spectra/Par' +str(parnos[0])+ '_' + str(next_obj).zfill(5)+'*_C.dat'))> 0:
-                            inspect_object(
-                                user,
-                                parnos[0],
-                                next_obj,
-                                objinfo,
-                                lamlines_found,
-                                ston_found,
-                                g102zeroarr,
-                                g141zeroarr,
-                                linelistoutfile,
-                                commentsfile,
-                                remaining_objects,
-                                allobjects,
-                                show_dispersed=show_dispersed,
-                                stored_fits=False,
-                                path_to_data=path_to_data, orientation='C')
 
                 else:
                     break
 
-    make_tarfile(outdir)
+    make_tarfile(outdir, path_to_code=path_to_code )
     print_prompt(
         "A tarfile of your outputs has been created: %s.tar.gz" % outdir,
         prompt_type="interim",
@@ -3209,8 +3187,8 @@ def writeToCatalog(
             cat.write("#" + str(results_idx + 0) + " " + line + "_flux \n")
             cat.write("#" + str(results_idx + 1) + " " + line + "_error \n")
             cat.write("#" + str(results_idx + 2) + " " + line + "_ew_obs \n")
-            cat.write("#" + str(results_idx + 2) + " " + line + "_ratio \n")
-            cat.write("#" + str(results_idx + 3) + " " + line + "_contam \n")
+            cat.write("#" + str(results_idx + 3) + " " + line + "_ratio \n")
+            cat.write("#" + str(results_idx + 4) + " " + line + "_contam \n")
             results_idx = results_idx + 5
 
         cat.close()
@@ -3635,8 +3613,8 @@ def writeToCatalog2gauss(
             cat.write("#" + str(results_idx + 0) + " " + line + "_flux \n")
             cat.write("#" + str(results_idx + 1) + " " + line + "_error \n")
             cat.write("#" + str(results_idx + 2) + " " + line + "_ew_obs \n")
-            cat.write("#" + str(results_idx + 2) + " " + line + "_ratio \n")
-            cat.write("#" + str(results_idx + 3) + " " + line + "_contam \n")
+            cat.write("#" + str(results_idx + 3) + " " + line + "_ratio \n")
+            cat.write("#" + str(results_idx + 4) + " " + line + "_contam \n")
             results_idx = results_idx + 5
 
         cat.close()

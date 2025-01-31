@@ -86,22 +86,22 @@ def showSpec2D_PASSAGE(parno, obid, path_to_data=""):
         # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width. Will need to be changed for NIRCam
         # The length is set to the length of the cutout -8 (for 4 pix on each end)
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 41 32.5 62 10# color=green} ")
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
+        
 
     for fframe in [6,7,8,9,10]:
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fframe))
         # 39.5 and 32.5 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye. 
         # Will need to be changed for NIRCam
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 48 32.5 76 10# color=green} ")
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
+        
 
     for fframe in [11,12,13,14,15]:
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9} frame " +str(fframe))
         # 70 and 33 are just 1/2 cutout length & 1/2 cutout width + a small offset derived by eye.
         # Will need to be changed for NIRCam
         os.system(f"xpaset -p {SPEC2D_TITLE_DS9}"+" region command {box 71.5 33 108 10# color=green} ")
-        os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
 
+    os.system(f"xpaset -p {SPEC2D_TITLE_DS9} zoom to fit")
 
 def find_file(directory, filename):
     """
@@ -224,7 +224,7 @@ def panDirect_PASSAGE(ra, dec):
         os.system(cmd)
 
         # zoom to
-        cmd = f"xpaset -p {ds9_title} zoom 2" # changed to zoom 1 on Jan 22. Unclear for now if this is better
+        cmd = f"xpaset -p {ds9_title} zoom 1" # changed to zoom 1 on Jan 22. Unclear for now if this is better
         os.system(cmd)
 
 

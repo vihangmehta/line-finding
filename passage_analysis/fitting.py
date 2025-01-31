@@ -1,7 +1,7 @@
 # Import required packages.
 from timeit import default_timer
 from passage_analysis import * # KVN: bad practice. Will want to update at some point
-from passage_analysis.mpfit import mpfit         # KVN: bad practice. Will want to update at some point
+from passage_analysis.mpfit import mpfit  
 from scipy.optimize import curve_fit
 
 '''The steps for adding additional emission lines to the model are the following:
@@ -52,6 +52,9 @@ he10830_vac = 10832.86
 pg_10941_vac = 10941.1
 pb_12822_vac = 12821.6
 pa_18756_vac = 18756.1
+
+# adding more lines here:
+ne3_3869_vac = 3868.760
 
 # Define the index number for each model parameter that will be fit by MPFIT.
 # This allows us to avoid hard-coding indices everywhere else within the code.
@@ -109,54 +112,60 @@ la_wing_sig_idx = 46 # ratio
 pg_10941_idx = 47
 pb_12822_idx = 48
 pa_18756_idx = 49
+ne3_3869_idx = 50
+
+
 # KVN: adding some more parameters -- it is much easier to add parameters to the end 
 # (even though t2_wave_idx and t_wave_idx are both transitions, better t2_wave_idx gets initiated here)
-t2_wave_idx  = 50 #
+t2_wave_idx  = 51 #
 # Note: The additional parameters for 2gauss fit are defined ONLY if comps == True
 # These are all set to zero if not fitting double gaussian in fit_obj to speed up the fitting
-la_1216_broad_idx = 51
-n5_1238_broad_idx = 52
-n5_1242_broad_idx = 53 # ratio
-c4_1548_broad_idx = 54
-c4_1550_broad_idx = 55 # ratio
-h2_1640_broad_idx = 56
-o3_1660_broad_idx = 57
-o3_1666_broad_idx = 58 # ratio
-s3_1883_broad_idx = 59
-s3_1892_broad_idx = 60 # ratio
-c3_1907_broad_idx = 61
-c3_1909_broad_idx = 62 # ratio
-m2_2796_broad_idx = 63
-m2_2803_broad_idx = 64 # ratio
-o2_3727_broad_idx = 65
-o2_3730_broad_idx = 66 # ratio
-hg_4342_broad_idx = 67
-o3_4363_broad_idx = 68
-h2_4686_broad_idx = 69
-hb_4863_broad_idx = 70
-o3_4959_broad_idx = 71
-o3_5007_broad_idx = 72 # ratio
-o1_6300_broad_idx = 73
-o1_6363_broad_idx = 74 # ratio
-n2_6550_broad_idx = 75
-ha_6565_broad_idx = 76
-n2_6585_broad_idx = 77 # ratio
-s2_6716_broad_idx = 78
-s2_6731_broad_idx = 79 # ratio
-s3_9069_broad_idx = 80
-s3_9532_broad_idx = 81 # ratio
-he10830_broad_idx = 82
+la_1216_broad_idx = t2_wave_idx + 1
+n5_1238_broad_idx = t2_wave_idx + 2
+n5_1242_broad_idx = t2_wave_idx + 3 # ratio
+c4_1548_broad_idx = t2_wave_idx + 4
+c4_1550_broad_idx = t2_wave_idx + 5 # ratio
+h2_1640_broad_idx = t2_wave_idx + 6
+o3_1660_broad_idx = t2_wave_idx + 7
+o3_1666_broad_idx = t2_wave_idx + 8 # ratio
+s3_1883_broad_idx = t2_wave_idx + 9
+s3_1892_broad_idx = t2_wave_idx + 10 # ratio
+c3_1907_broad_idx = t2_wave_idx + 11
+c3_1909_broad_idx = t2_wave_idx + 12 # ratio
+m2_2796_broad_idx = t2_wave_idx + 13
+m2_2803_broad_idx = t2_wave_idx + 14 # ratio
+o2_3727_broad_idx = t2_wave_idx + 15
+o2_3730_broad_idx = t2_wave_idx + 16 # ratio
+hg_4342_broad_idx = t2_wave_idx + 17
+o3_4363_broad_idx = t2_wave_idx + 18
+h2_4686_broad_idx = t2_wave_idx + 19
+hb_4863_broad_idx = t2_wave_idx + 20
+o3_4959_broad_idx = t2_wave_idx + 21
+o3_5007_broad_idx = t2_wave_idx + 22 # ratio
+o1_6300_broad_idx = t2_wave_idx + 23
+o1_6363_broad_idx = t2_wave_idx + 24 # ratio
+n2_6550_broad_idx = t2_wave_idx + 25
+ha_6565_broad_idx = t2_wave_idx + 26
+n2_6585_broad_idx = t2_wave_idx + 27 # ratio
+s2_6716_broad_idx = t2_wave_idx + 28
+s2_6731_broad_idx = t2_wave_idx + 29 # ratio
+s3_9069_broad_idx = t2_wave_idx + 30
+s3_9532_broad_idx = t2_wave_idx + 31 # ratio
+he10830_broad_idx = t2_wave_idx + 32
 # la_wing_amp_broad_idx = 83 # lyman alpha wing.
 # la_wing_sig_broad_idx = 84 # ratio
-pg_10941_broad_idx = 83
-pb_12822_broad_idx = 84
-pa_18756_broad_idx = 85
+pg_10941_broad_idx = t2_wave_idx + 33
+pb_12822_broad_idx = t2_wave_idx + 34
+pa_18756_broad_idx = t2_wave_idx + 35
+
+# KVN: adding new lines below:
+ne3_3869_broad_idx = t2_wave_idx + 36
 
 # These are for the width of the broad gaussian component
 # Here, they are set to be the same but if using data with different resolution, these will be different
 # so keeping the functionality by defining 2 parameters
-fwhm_grism_idx_broad = 86 # fwhm_red
-fwhm_ratio_idx_broad = 87 # fwhm_blue = (ratio_fwhm * fwhm_red)
+fwhm_grism_idx_broad = t2_wave_idx + 37 # fwhm_red
+fwhm_ratio_idx_broad = t2_wave_idx + 38 # fwhm_blue = (ratio_fwhm * fwhm_red)
 
 
 number_of_param = fwhm_ratio_idx_broad + 1 # + 1 of highest index. taking the last index and adding one
@@ -166,8 +175,8 @@ number_of_param = fwhm_ratio_idx_broad + 1 # + 1 of highest index. taking the la
 
 first_line_index = 6  # This should be the first emission line parameter index.
 first_node_index = number_of_param # This must be one larger than last line parameter index.
-ratio_indices = [15, 17, 20, 22, 24, 26, 28, 34, 36, 39, 41, 43, 46, 53, 55, 58, 60, 62, 64, 66, 72, 74, 77, 79, 81] # A list of all parameter indices that are ratios below.
-first_broadline_index = 51
+ratio_indices = [n5_1242_idx, c4_1550_idx, o3_1666_idx, s3_1892_idx, c3_1909_idx, m2_2803_idx, o2_3730_idx, o3_5007_idx, o1_6363_idx, n2_6585_idx, s2_6731_idx, s3_9532_idx, la_wing_sig_idx, n5_1242_broad_idx, c4_1550_broad_idx, o3_1666_broad_idx, s3_1892_broad_idx, c3_1909_broad_idx, m2_2803_broad_idx, o2_3730_broad_idx, o3_5007_broad_idx, o1_6363_broad_idx, n2_6585_broad_idx, s2_6731_broad_idx, s3_9532_broad_idx] # A list of all parameter indices that are ratios below.
+first_broadline_index = la_1216_broad_idx
 
 def get_ratio_indices():
     return ratio_indices
@@ -227,7 +236,7 @@ def get_continuum_fit(pars, cont_model, x, first_node_index, nnodes, transition_
                 cont_model[w] = polynom(x[w], continuum_poly_model_blue[0], continuum_poly_model_blue[1], continuum_poly_model_blue[2], continuum_poly_model_blue[3])                
             else: cont_model[w] = interpolate.splev(x[w], continuum_spline_model_blue, der=0)
         
-        ######### KVN testing the linear fit below: #########
+        ######### KVN testing the linear continuum fit below: #########
         # print('F115W continuum shape = ', np.shape(cont_model[w]), 'F115W x shape = ', np.shape(spline_x_values_blue), cont_model[w] )
         # print('F115W continuum lines = ', np.shape(line(x[w], continuum_line_model_blue[0], continuum_line_model_blue[1])), line(x[w], continuum_line_model_blue[0], continuum_line_model_blue[1]))
 
@@ -427,6 +436,9 @@ def emissionline_model(pars, x, comps, polycont, lincont):
         # lyman alpha wing.
         la_wing_amp = pars[la_wing_amp_idx]
         la_wing_sig = pars[la_wing_sig_idx]
+
+        # KVN: adding new lines here:
+        ne3_3869_amp = pars[ne3_3869_idx]
     
         
         # define the observed wavelengths
@@ -466,6 +478,8 @@ def emissionline_model(pars, x, comps, polycont, lincont):
         pb_12822_obs = pb_12822_vac * (1 + z)
         pa_18756_obs = pa_18756_vac * (1 + z)
 
+        ne3_3869_obs = ne3_3869_vac * (1 + z)
+
         # initialize the continuum and emission line models as lists of zeros.
         cont_model = x * 0.
         line_model = x * 0.
@@ -494,6 +508,8 @@ def emissionline_model(pars, x, comps, polycont, lincont):
         add_emission_line_to_model(line_model, pg_10941_obs, pg_10941_amp)
         add_emission_line_to_model(line_model, pb_12822_obs, pb_12822_amp)
         add_emission_line_to_model(line_model, pa_18756_obs, pa_18756_amp)
+
+        add_emission_line_to_model(line_model, ne3_3869_obs, pa_18756_amp)
         
         ############################################################################
         # lyman alpha is highly asymmetric so add a red wing component.
@@ -588,6 +604,9 @@ def emissionline_model(pars, x, comps, polycont, lincont):
         # lyman alpha wing.
         la_wing_amp = pars[la_wing_amp_idx];           #la_wing_broad_amp = pars[la_wing_amp_broad_idx]
         la_wing_sig = pars[la_wing_sig_idx];           #la_wing_broad_sig = pars[la_wing_sig_broad_idx]
+
+        # KVN: add new lines:
+        ne3_3869_amp = pars[ne3_3869_amp_idx]; 
     
         
         # define the observed wavelengths
@@ -1404,6 +1423,9 @@ def fit_obj(input_list):
         pg_10941_obs = pg_10941_vac * (1 + z_out)
         pb_12822_obs = pb_12822_vac * (1 + z_out)
         pa_18756_obs = pa_18756_vac * (1 + z_out)
+
+        ## KVN: add new lines:
+        ne3_3869_obs = ne3_3869_vac * (1 + z_out)
     
         ########################################################################
         ########################################################################
