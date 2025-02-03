@@ -127,8 +127,8 @@ def create_regions(parno, path_to_data):
 
     spec_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*spec*.fits")
     phot_cat = glob.glob(path_to_data + "/Par" + str(parno) + "/DATA/DIRECT_GRISM/Par*phot*.fits")
-    hdul = fits.open(spec_cat[0]); hdul_phot = fits.open(phot_cat[0])
-    cat=hdul[1].data; cat_phot=hdul_phot[1].data
+    hdul = hdul_phot = fits.open(phot_cat[0])
+    cat = cat_phot = hdul_phot[1].data
     
 
 
@@ -137,7 +137,7 @@ def create_regions(parno, path_to_data):
     for i in range(len(cat)):
         # A better way to do this is:
         # e.g. np.savetxt(data, fmt="circle(%f, %f, 0.5\") #color=green text=.....")
-        f.write("WCS;circle("+str(cat['ra'][i])+','+str(cat['dec'][i])+',0.5") # color=green text={'+str(cat['id'][i])+' z='+str(round(cat['redshift'][i],3))+'} font="times 10 bold italic" textangle=30\n')
+        f.write("WCS;circle("+str(cat['ra'][i])+','+str(cat['dec'][i])+',0.5") # color=green text={'+str(cat['id'][i])+'} font="times 10 bold italic" textangle=30\n')
     f.close()
 
     #This and subsequent are for the first order beams. Offsets taken from the config files
@@ -223,10 +223,10 @@ def make_spectra_dat_files(parno, path_to_data):
             tb = Table(fff[ext].data).to_pandas()
             t_out = pd.DataFrame(fff[ext].data)
 
-
             ### !!! IMPORTANT !!!
             ### VM: This is temporary while we fix this in the pipeline
             ### The R/C spectra have already been treated for the following operations
+            ### Leaving it in for backwards compatibility
             if "err" in fff[ext].data.dtype.names:
 
                 t_out['wave'] = tb['wave']
@@ -235,7 +235,12 @@ def make_spectra_dat_files(parno, path_to_data):
                 t_out['contam'] = tb['contam']/tb['flat']
                 t_out['zeroth'] = np.zeros(len(tb['wave'])).astype('int')
 
+            ### VM: Additional backwards compatbility fix
+            if "error" in t_out.columns:
+                t_out = t_out.rename(columns={"error": "ferr"})
+
             t_out = Table.from_pandas(t_out)
+
             ### VM: Explicitly fix nans to 0s
             for col in t_out.columns:
                 t_out[col][np.isnan(t_out[col])] = 0
@@ -243,7 +248,7 @@ def make_spectra_dat_files(parno, path_to_data):
 
             # Spectra dispersed beyond the chip have zero fluxes that must be replaced to prevent crashes in fitting.
             t_out['flux'][np.where(t_out['flux'] == 0.0)] = np.median(t_out['flux'][np.where(t_out['flux'] != 0.0)])
-            t_out['error'][np.where(t_out['error'] == 0.0)]=np.median(t_out['error'][np.where(t_out['error'] != 0.0)])
+            t_out['ferr'][np.where(t_out['ferr'] == 0.0)] = np.median(t_out['ferr'][np.where(t_out['ferr'] != 0.0)])
 
             for filt in ["115", "150", "200"]:
 
