@@ -17,7 +17,7 @@ def find_cwt(lam, flux, err, zeros, fwhm_est_pix, beam_name, config_pars, plotfl
     snr_cwt = config_pars['snr_cwt'] # snr for the cwt line finder
     noise_cut_cwt = config_pars['noise_cut_cwt'] # noise cut for cwt to estimate noise
     min_length_cwt = config_pars['min_length_ridge'] # minimum length of a cwt ridge to be considered real
-    edge_reject = config_pars['edge_reject'] # reject cwt detections within 5 pixcels of edge
+    edge_reject = config_pars['edge_reject'] # reject cwt detections within 5 pixels of edge
     sn_thresh_cont_check = config_pars['n_sigma_above_cont'] # step2 requires cwt line candidates to have npix_thresh abvove sn_thresh_cont_check
     npix_thresh = config_pars['npix_thresh']
     min_line_contrast = config_pars['min_line_contrast'] # minimum allowed for rejecting low EW lines.
@@ -258,7 +258,8 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         trimmed_spec = trim_spec(None, spdata, None, config_pars)
         # beam = float(filename.split('_')[1].split('.')[0])
         beam = float(filename.split('Spectra/Par')[1].split('_')[1].split('.')[0])
-        parno = os.getcwd().split('/')[-2].split('Par')[-1] # fixed parallel field number to zero for the mudf program
+        parno = parno
+        print('Par Number: ', parno)
         w = np.where(beam_se == beam)
         w = w[0]    # because of tuples
         a_image = a_images[w][0]
@@ -309,6 +310,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         # beam = float(filename.split('_')[1].split('.')[0])
         beam = float(filename.split('Spectra/Par')[1].split('_')[1].split('.')[0])
         parno = parno # fixed parallel field number to zero for the mudf program
+        print('Par Number: ', parno)
         w = np.where(beam_se == beam)
         w = w[0]    # because of tuples
         a_image = a_images[w][0]
@@ -365,7 +367,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
     snr = snr[s]
     par = par[0]
     beams_unique = np.unique(beam)
-    outfile = open(os.path.join(path_to_data, 'linelist/Par'+str(par) + 'lines.dat'), 'w')
+    outfile = open(os.path.join(path_to_data, 'linelist/Par'+str(parno) + 'lines.dat'), 'w')
 
     for b in beams_unique:
         # do the g102 for b
@@ -382,7 +384,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         snr_final_g115 = snr_uniq[s]
 
         for lam, npx, sn in zip(waves_final_g115, npix_final_g115, snr_final_g115):
-            outfile.write(str(par) + '  G115  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
+            outfile.write(str(parno) + '  G115  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
 
         # do the g141 for b  
         w = (beam == b) & (grism == 'G150')
@@ -398,7 +400,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         snr_final_g150 = snr_uniq[s]
 
         for lam, npx, sn in zip(waves_final_g150, npix_final_g150, snr_final_g150):
-            outfile.write(str(par) + '  G150  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
+            outfile.write(str(parno) + '  G150  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
 
         # KVN: Adding third grism filter: do the g200 for b  
         w = (beam == b) & (grism == 'G200')
@@ -414,7 +416,7 @@ def loop_field_cwt(path_to_data, path_to_code, parno):
         snr_final_g200 = snr_uniq[s]
 
         for lam, npx, sn in zip(waves_final_g200, npix_final_g200, snr_final_g200):
-            outfile.write(str(par) + '  G200  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
+            outfile.write(str(parno) + '  G200  ' + str(b) + '  ' + str(lam) + '  ' + str(npx) + '  ' + str(sn) + '\n')
 
     outfile.close()
 
