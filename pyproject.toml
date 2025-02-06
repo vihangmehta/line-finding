@@ -21,11 +21,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "numpy>=1.26.4, <2",
-    "astropy>=5.3, <7",
-    "pandas>=1.0, <3",
-    "scipy==1.14.1",
-    "matplotlib>=3.6, <3.11"
+#    "numpy>=1.26.4, <2",
+#    "astropy>=5.3, <7",
+#    "pandas>=1.0, <3",
+#    "scipy==1.14.1",
+#    "matplotlib>=3.6, <3.11"
 ]
 
 [project.urls]

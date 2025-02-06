@@ -5,12 +5,12 @@ import re
 import glob
 
 # Open two ds9 windows:
-os.system('/Applications/SAOImageDS9.app/Contents/MacOS/ds9 -title PASSAGE_DIRECT &')
-os.system('/Applications/SAOImageDS9.app/Contents/MacOS/ds9 -title PASSAGE_spec2D &')
+os.system('ds9 -title PASSAGE_DIRECT &')
+os.system('ds9 -title PASSAGE_spec2D &')
 
-CODE_DIR = "/Users/knedkova/Work/2024PASSAGE/passage_analysis"
-OUTPUT_DIR = "/Users/knedkova/Work/2024PASSAGE/output"
-DATA_DIR = "/Users/knedkova/Work/2024PASSAGE/data/"
+CODE_DIR = "/data/PASSAGE/linefind/line-finding/passage_analysis/"
+OUTPUT_DIR = "/data/PASSAGE/linefind/output/"
+DATA_DIR = "/data/PASSAGE/linefind/data/"
 
 
 #############################################################
@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     specdatfiles = glob.glob(DATA_DIR + "Par" + str(parno) + "/Spectra/*.dat")
     if len(specdatfiles) == 0:
-        utilities.add_header_keyword(parno = parno, path_to_data = DATA_DIR)
+        # utilities.add_header_keyword(parno = parno, path_to_data = DATA_DIR)
         utilities.make_spectra_dat_files(parno = parno, path_to_data = DATA_DIR)
 
     # check if line list exists. If not, run code to create the linelist

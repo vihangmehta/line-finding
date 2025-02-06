@@ -37,7 +37,7 @@ import fileinput
 import scipy
 #### Added by KVN: this changes the matplotlib backend
 import matplotlib
-matplotlib.use('TkAgg')
+# matplotlib.use('TkAgg')
 ####
 import matplotlib.pylab as plt
 from scipy.interpolate import splrep as spline
